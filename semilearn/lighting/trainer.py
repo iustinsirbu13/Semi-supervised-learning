@@ -19,8 +19,9 @@ class Trainer:
         self.algorithm = algorithm
 
         # TODO: support distributed training?
-        torch.cuda.set_device(config.gpu)
-        self.algorithm.model = self.algorithm.model.cuda(config.gpu)
+        # Remove CUDA!!!
+        # torch.cuda.set_device(config.gpu)
+        # self.algorithm.model = self.algorithm.model.cuda(config.gpu)
 
         # setup logger
         self.save_path = os.path.join(config.save_dir, config.save_name)
@@ -115,10 +116,17 @@ class Trainer:
                 y = data['y_lb']
 
                 if isinstance(x, dict):
-                    x = {k: v.cuda(self.config.gpu) for k, v in x.items()}
+                    # Remove CUDA!!!
+                    # x = {k: v.cuda(self.config.gpu) for k, v in x.items()}
+                    x = {k: v for k, v in x.items()}
                 else:
-                    x = x.cuda(self.config.gpu)
-                y = y.cuda(self.config.gpu)
+                    # Remove CUDA!!!
+                    # x = x.cuda(self.config.gpu)
+                    x = x
+
+                # Remove CUDA!!!    
+                # y = y.cuda(self.config.gpu)
+                y = y
 
                 logits = self.algorithm.model(x)['logits']
                     

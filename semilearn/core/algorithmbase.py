@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 from semilearn.core.criterions import CELoss, ConsistencyLoss
 from semilearn.core.hooks import (
-    AimHook,
+    # AimHook,
     CheckpointHook,
     DistSamplerSeedHook,
     EMAHook,
@@ -264,8 +264,8 @@ class AlgorithmBase:
         self.register_hook(LoggingHook(), None, "LOWEST")
         if self.args.use_wandb:
             self.register_hook(WANDBHook(), None, "LOWEST")
-        if self.args.use_aim:
-            self.register_hook(AimHook(), None, "LOWEST")
+        # if self.args.use_aim:
+        #     self.register_hook(AimHook(), None, "LOWEST")
 
     def process_batch(self, input_args=None, **kwargs):
         """
@@ -288,9 +288,13 @@ class AlgorithmBase:
 
             # send var to cuda
             if isinstance(var, dict):
-                var = {k: v.cuda(self.gpu) for k, v in var.items()}
+                # Remove CUDA!!!
+                # var = {k: v.cuda(self.gpu) for k, v in var.items()}
+                var = {k: v for k, v in var.items()}
             else:
-                var = var.cuda(self.gpu)
+                # Remove CUDA!!!
+                # var = var.cuda(self.gpu)
+                var = var
             input_dict[arg] = var
         return input_dict
 
@@ -386,10 +390,17 @@ class AlgorithmBase:
                 y = data["y_lb"]
 
                 if isinstance(x, dict):
-                    x = {k: v.cuda(self.gpu) for k, v in x.items()}
+                    # Remove CUDA!!!
+                    # x = {k: v.cuda(self.gpu) for k, v in x.items()}
+                    x = {k: v for k, v in x.items()}
                 else:
-                    x = x.cuda(self.gpu)
-                y = y.cuda(self.gpu)
+                    # Remove CUDA!!!
+                    # x = x.cuda(self.gpu)
+                    x = x
+
+                # Remove CUDA!!!
+                # y = y.cuda(self.gpu)
+                y = y
 
                 num_batch = y.shape[0]
                 total_num += num_batch
