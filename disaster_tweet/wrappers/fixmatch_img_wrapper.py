@@ -23,50 +23,30 @@ class FixMatchImgWrapper(FixMatchDisasterWrapper):
 
         super().__init__(config)
 
+    # @overrides
+    def get_dataset(self, x, targets, weak_image_transform, strong_image_transform=None):
+        config = self.config
+        return super().get_dataset(
+                        DisasterDatasetImage, # T
+                        data=x,
+                        targets=targets,
+                        num_classes=config.num_classes,
+                        weak_transform=weak_image_transform,
+                        img_dir=config.img_dir,
+                        labels=config.labels,
+                        img_size=config.img_size,
+                        strong_transform=strong_image_transform)
 
+
+    # @overrides
     def prepare_datasets(self, config):
-        # weak and strong image transformation
-        transform_weak = self.get_weak_transform(config.img_size, config.crop_ratio)
-        transform_strong = self.get_strong_transform(config.img_size, config.crop_ratio)
-        
-        # transformation used for dev and test datasets
-        eval_tranform = self.get_eval_transform(config.img_size)
+        # weak/strong/eval image transformations
+        weak_image_transform = self.get_weak_image_transform(config.img_size, config.crop_ratio)
+        strong_image_transform = self.get_strong_image_transform(config.img_size, config.crop_ratio)
+        eval_image_tranform = self.get_eval_image_transform(config.img_size)
 
-        self.train_dataset = DisasterDatasetImage(
-                                data=self.train_x,
-                                targets=self.train_target,
-                                num_classes=config.num_classes,
-                                weak_transform=transform_weak,
-                                img_dir=config.img_dir,
-                                labels=config.labels,
-                                img_size=config.img_size)
-        
-        self.dev_dataset = DisasterDatasetImage(
-                                data=self.dev_x,
-                                targets=self.dev_target,
-                                num_classes=config.num_classes,
-                                weak_transform=eval_tranform,
-                                img_dir=config.img_dir,
-                                labels=config.labels,
-                                img_size=config.img_size)
-
-
-        self.test_dataset = DisasterDatasetImage(
-                                data=self.test_x,
-                                targets=self.test_target,
-                                num_classes=config.num_classes,
-                                weak_transform=eval_tranform,
-                                img_dir=config.img_dir,
-                                labels=config.labels,
-                                img_size=config.img_size)
-
-
-        self.unlabeled_dataset = DisasterDatasetImage(
-                                    data=self.unlabeled_x,
-                                    targets=None,
-                                    num_classes=config.num_classes,
-                                    weak_transform=transform_weak,
-                                    strong_transform=transform_strong,
-                                    img_dir=config.img_dir,
-                                    labels=config.labels,
-                                    img_size=config.img_size)
+        self.train_dataset = self.get_dataset(self.train_x, self.train_target, weak_image_transform)
+        self.dev_dataset = self.get_dataset(self.dev_x, self.dev_target, eval_image_tranform)
+        self.test_dataset = self.get_dataset(self.test_x, self.test_target, eval_image_tranform)
+        self.unlabeled_dataset = self.get_dataset(self.unlabeled_x, None, weak_image_transform,
+                                                    strong_image_transform=strong_image_transform)

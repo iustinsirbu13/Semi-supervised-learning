@@ -2,7 +2,7 @@ import sys
 sys.path.append("..")
 
 from semilearn import get_config
-from wrappers.fixmatch_mmbt_wrapper import FixMatchMMBTWrapper
+from disaster_tweet.wrappers.fixmatch_mmbt_bert_wrapper import FixMatchMMBTBertWrapper
 
 def parse_config():
     config = {
@@ -47,8 +47,8 @@ def parse_config():
 
 def main():
     config = parse_config()
-    fix_match_mmbt_wrapper = FixMatchMMBTWrapper(config)
-    fix_match_mmbt_wrapper.train_evaluate()
+    fix_match_bert_mmbt_wrapper = FixMatchMMBTBertWrapper(config)
+    fix_match_bert_mmbt_wrapper.train_evaluate()
 
 if __name__ == '__main__':
     main()

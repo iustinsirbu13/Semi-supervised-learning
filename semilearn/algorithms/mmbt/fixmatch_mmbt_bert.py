@@ -6,8 +6,8 @@ from semilearn.core.utils import ALGORITHMS
 from inspect import signature
 
 
-@ALGORITHMS.register('fixmatch_mmbt')
-class FixMatchMMBT(AlgorithmBase):
+@ALGORITHMS.register('fixmatch_mmbt_bert')
+class FixMatchMMBTBert(AlgorithmBase):
     def __init__(self, args, net_builder, tb_log=None, logger=None):
         super().__init__(args, net_builder, tb_log, logger) 
 

@@ -3,8 +3,6 @@ from torchvision import transforms
 from utils.arg_check import has_argument
 from utils.randaugment import RandAugmentMC
 
-from semilearn import get_data_loader
-
 from wrappers.fixmatch_base_wrapper import FixMatchBaseWrapper
 
 class FixMatchDisasterWrapper(FixMatchBaseWrapper):
@@ -33,7 +31,7 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
         super().__init__(config)
     
         
-    def get_weak_transform(self, img_size, crop_ratio):
+    def get_weak_image_transform(self, img_size, crop_ratio):
         return transforms.Compose([
                                 transforms.Resize(img_size),
                                 transforms.RandomHorizontalFlip(),
@@ -42,7 +40,7 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
                                 transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
                             ])
     
-    def get_strong_transform(self, img_size, crop_ratio):
+    def get_strong_image_transform(self, img_size, crop_ratio):
         return transforms.Compose([
                                 transforms.Resize(img_size),
                                 transforms.RandomHorizontalFlip(),
@@ -52,7 +50,7 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
                                 transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
                             ])
 
-    def get_eval_transform(self, img_size):
+    def get_eval_image_transform(self, img_size):
         return transforms.Compose([
                                     transforms.Resize(img_size),
                                     transforms.CenterCrop(size=img_size),
@@ -60,9 +58,6 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
                                     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
                                 ])
 
-    # @overrides
-    def prepare_dataloaders(self, config):
-        self.train_loader = get_data_loader(config, self.train_dataset, config.batch_size)
-        self.dev_loader = get_data_loader(config, self.dev_dataset, config.eval_batch_size)
-        self.test_loader = get_data_loader(config, self.test_dataset, config.eval_batch_size)
-        self.unlabeled_loader = get_data_loader(config, self.unlabeled_dataset, config.batch_size * config.uratio)
+
+    def get_dataset(self, T, **kwargs):
+        return T(**kwargs)

@@ -1,7 +1,4 @@
-import os
-import numpy as np 
 import random
-
 import torch
 from semilearn.datasets.disaster_datasets.disaster_img import DisasterDatasetImage
 
@@ -21,6 +18,8 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
                  max_seq_length,
                  tokenizer,
                  vocab,
+                 model,
+                 num_image_embeds,
                  strong_image_transform=None,
                  strong_text_tag=None,
                  *args, 
@@ -48,9 +47,12 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
         self.max_seq_length = max_seq_length
         assert self.max_seq_length is not None
 
-        # Ignore this part for now
-        # if self.model == 'mmbt_bert':
-        #     self.max_seq_length -= num_image_embeds
+        self.model = model
+        assert self.model is not None
+
+        if self.model == 'mmbt_bert':
+            assert num_image_embeds is not None
+            self.max_seq_length -= num_image_embeds
 
         self.tokenizer = tokenizer
         assert self.tokenizer is not None
@@ -58,10 +60,7 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
         self.vocab = vocab
         assert self.vocab is not None
 
-        # Ignore this part for now
-        # self.text_start_token = ["[CLS]"] if self.model != "mmbt" else ["[SEP]"]
-
-        self.text_start_token = ["[SEP]"]
+        self.text_start_token = ["[CLS]"] if self.model != "mmbt_bert" else ["[SEP]"]
 
         self.TEXT_SIZE = 192
     
@@ -78,14 +77,13 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
             ]
         )
         
-        # Ignore this part for now
-        # if self.args.model == "mmbt":
-        
-        # The first SEP is part of Image Token.
-        segment = segment[1:]
-        sentence = sentence[1:]
-        # The first segment (0) is of images.
-        segment += 1
+        # ToDo: clarify this???
+        if self.model == 'mmbt_bert':
+            # The first SEP is part of Image Token.
+            segment = segment[1:]
+            sentence = sentence[1:]
+            # The first segment (0) is of images.
+            segment += 1
 
         return sentence, segment
         
@@ -106,13 +104,13 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
     def get_sentence_segment_mask_tensor(self, sentence, segment):
         length = min(self.TEXT_SIZE, len(sentence))
 
-        sentence_tensor = torch.zeros(1, self.TEXT_SIZE).long()
-        segment_tensor = torch.zeros(1, self.TEXT_SIZE).long()
-        mask_tensor = torch.zeros(1, self.TEXT_SIZE).long()
+        sentence_tensor = torch.zeros(self.TEXT_SIZE).long()
+        segment_tensor = torch.zeros(self.TEXT_SIZE).long()
+        mask_tensor = torch.zeros(self.TEXT_SIZE).long()
 
-        sentence_tensor[0][:length] = sentence[:length]
-        segment_tensor[0][:length] = segment[:length]
-        mask_tensor[0][:length] = 1
+        sentence_tensor[:length] = sentence[:length]
+        segment_tensor[:length] = segment[:length]
+        mask_tensor[:length] = 1
 
         return sentence_tensor, segment_tensor, mask_tensor
 

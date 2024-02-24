@@ -3,7 +3,7 @@ sys.path.append('../..')
 
 import os, random, jsonlines
 
-from semilearn import get_net_builder, get_algorithm, Trainer
+from semilearn import get_data_loader, get_net_builder, get_algorithm, Trainer
 
 
 class FixMatchBaseWrapper:
@@ -24,6 +24,7 @@ class FixMatchBaseWrapper:
         # prepare USB datasets and loaders
         self.prepare_datasets(config)
         self.prepare_dataloaders(config)
+    
     
     def read_labeled_dataset(self, filename, config, num_entries_per_class=0):
         filepath = os.path.join(config.data_dir, filename)
@@ -62,6 +63,13 @@ class FixMatchBaseWrapper:
 
         return x
     
+    def prepare_dataloaders(self, config):
+        self.train_loader = get_data_loader(config, self.train_dataset, config.batch_size)
+        self.dev_loader = get_data_loader(config, self.dev_dataset, config.eval_batch_size)
+        self.test_loader = get_data_loader(config, self.test_dataset, config.eval_batch_size)
+        self.unlabeled_loader = get_data_loader(config, self.unlabeled_dataset, config.batch_size * config.uratio)
+
+
     def train(self):
         trainer = Trainer(self.config, self.algorithm)
         trainer.fit(self.train_loader, self.unlabeled_loader, self.test_loader)
@@ -79,7 +87,4 @@ class FixMatchBaseWrapper:
     ########################
     
     def prepare_datasets(self):
-        raise NotImplementedError
-    
-    def prepare_dataloaders(self):
         raise NotImplementedError
