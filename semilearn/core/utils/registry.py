@@ -25,6 +25,9 @@ class Register:
     def register(self, target):
         """Decorator to register a function or class."""
 
+        # if self._name == 'algorithms':
+        #     print(target)
+
         def add(key, value):
             self[key] = value
             return value
@@ -65,7 +68,8 @@ def _handle_errors(errors):
 ALL_MODULES = [
     # NOTE: add all algorithms here
     ('semilearn.algorithms', ['adamatch', 'comatch', 'crmatch', 'dash', 'fixmatch', 'flexmatch', 'fullysupervised', 'meanteacher',
-                              'mixmatch', 'pimodel', 'pseudolabel', 'remixmatch', 'simmatch', 'uda', 'vat', 'softmatch', 'freematch', 'defixmatch']),
+                              'mixmatch', 'pimodel', 'pseudolabel', 'remixmatch', 'simmatch', 'uda', 'vat', 'softmatch', 'freematch', 'defixmatch',
+                              'mmbt']),
     ('semilearn.imb_algorithms', ['abc', 'cossl', 'adsh', 'crest', 'darp', 'daso', 'debiaspl', 'saw', 'tras'])
 ]
 

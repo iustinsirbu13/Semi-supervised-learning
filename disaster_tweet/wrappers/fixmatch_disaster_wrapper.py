@@ -1,17 +1,19 @@
 from torchvision import transforms
+
+from utils.arg_check import has_argument
 from utils.randaugment import RandAugmentMC
 
 from semilearn import get_data_loader
-from semilearn.datasets.disaster_datasets.disaster_img import DisasterDatasetImage
 
 from wrappers.fixmatch_base_wrapper import FixMatchBaseWrapper
 
 class FixMatchDisasterWrapper(FixMatchBaseWrapper):
 
     def __init__(self, config):
+        assert has_argument(config, 'data_dir')
         config.dataset = 'CrisisMMD'
 
-        assert config.task is not None
+        assert has_argument(config, 'task')
         if config.task == 'humanitarian':
             config.labels = ['not_humanitarian', 'other_relevant_information', 'rescue_volunteering_or_donation_effort', 'infrastructure_and_utility_damage', 'affected_individuals']
         elif config.task == 'informative':
@@ -19,11 +21,11 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
         elif config.task == 'damage':
             config.labels = ['damage', 'no damage']
         else:
-            raise Exception(f'{config.task} is not supported')
+            raise Exception(f'Task {config.task} is not supported')
 
         config.num_classes = len(config.labels)
 
-        if config.num_labels is not None:
+        if has_argument(config, 'num_labels'):
             config.num_entries_per_class = config.num_labels // config.num_classes
         else:
             config.num_entries_per_class = 0
@@ -57,51 +59,8 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
                                     transforms.ToTensor(),
                                     transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
                                 ])
-    
-    def prepare_datasets(self, config):
-        # weak and strong image transformation
-        transform_weak = self.get_weak_transform(config.img_size, config.crop_ratio)
-        transform_strong = self.get_strong_transform(config.img_size, config.crop_ratio)
-        
-        # transformation used for dev and test datasets
-        eval_tranform = self.get_eval_transform(config.img_size)
 
-        self.train_dataset = DisasterDatasetImage(self.train_x,
-                                            self.train_target,
-                                            config.num_classes,
-                                            transform_weak,
-                                            img_dir=config.img_dir,
-                                            labels=config.labels,
-                                            img_size=config.img_size)
-        
-        self.dev_dataset = DisasterDatasetImage(self.dev_x,
-                                            self.dev_target,
-                                            config.num_classes,
-                                            eval_tranform,
-                                            img_dir=config.img_dir,
-                                            labels=config.labels,
-                                            img_size=config.img_size)
-
-
-        self.test_dataset = DisasterDatasetImage(self.test_x,
-                                            self.test_target,
-                                            config.num_classes,
-                                            eval_tranform,
-                                            img_dir=config.img_dir,
-                                            labels=config.labels,
-                                            img_size=config.img_size)
-
-
-        self.unlabeled_dataset = DisasterDatasetImage(self.unlabeled_x,
-                                                None,
-                                                config.num_classes,
-                                                transform_weak,
-                                                strong_transform=transform_strong,
-                                                img_dir=config.img_dir,
-                                                labels=config.labels,
-                                                img_size=config.img_size)
-
-
+    # @overrides
     def prepare_dataloaders(self, config):
         self.train_loader = get_data_loader(config, self.train_dataset, config.batch_size)
         self.dev_loader = get_data_loader(config, self.dev_dataset, config.eval_batch_size)

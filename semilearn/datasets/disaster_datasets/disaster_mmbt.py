@@ -10,21 +10,23 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
 
     def __init__(self,
                  data,
-                 targets=None,
-                 num_classes=None,
-                 weak_image_transform=None,
+                 targets,
+                 num_classes,
+                 labels,
+                 weak_image_transform,
+                 img_dir,
+                 img_size,
+                 weak_text_tag,
+                 text_dir,
+                 max_seq_length,
+                 tokenizer,
+                 vocab,
                  strong_image_transform=None,
-                 weak_text_tag=None,
                  strong_text_tag=None,
-                 labels=[],
-                 img_dir=None,
-                 img_size=224,
-                 text_dir=None,
-                 max_seq_length=192,
                  *args, 
                  **kwargs):
         
-        super().__init__(data, 
+        super().__init__(data=data, 
                         targets=targets,
                         num_classes=num_classes,
                         weak_transform=weak_image_transform,
@@ -42,37 +44,75 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
         
         self.text_dir = text_dir
         assert self.text_dir is not None
-
+        
         self.max_seq_length = max_seq_length
+        assert self.max_seq_length is not None
+
+        # Ignore this part for now
+        # if self.model == 'mmbt_bert':
+        #     self.max_seq_length -= num_image_embeds
+
+        self.tokenizer = tokenizer
+        assert self.tokenizer is not None
+
+        self.vocab = vocab
+        assert self.vocab is not None
+
+        # Ignore this part for now
+        # self.text_start_token = ["[CLS]"] if self.model != "mmbt" else ["[SEP]"]
+
+        self.text_start_token = ["[SEP]"]
+
+        self.TEXT_SIZE = 192
     
 
-    def get_sentence_segment(text):
-        pass
+    def get_sentence_segment(self, text):
+        tokenized_text = self.tokenizer(text)
+        sentence = self.text_start_token + tokenized_text[:(self.max_seq_length - 1)]
+        segment = torch.zeros(len(sentence))
+
+        sentence = torch.LongTensor(
+            [
+                self.vocab.stoi[w] if w in self.vocab.stoi else self.vocab.stoi["[UNK]"]
+                for w in sentence
+            ]
+        )
+        
+        # Ignore this part for now
+        # if self.args.model == "mmbt":
+        
+        # The first SEP is part of Image Token.
+        segment = segment[1:]
+        sentence = sentence[1:]
+        # The first segment (0) is of images.
+        segment += 1
+
+        return sentence, segment
         
     def sample(self, idx):
         image, target = super().sample(idx)
 
         weak_text = self.data[idx][self.weak_text_tag]
-        if self.weak_text_tag != 'text': 
+        if self.weak_text_tag != 'text':
             weak_text = random.choice(weak_text)
 
         strong_text = None
-        if self.strong_text_tag == None:
+        if self.strong_text_tag is not None:
             strong_text = random.choice(self.data[idx][self.strong_text_tag])
 
         return image, target, weak_text, strong_text
 
     
     def get_sentence_segment_mask_tensor(self, sentence, segment):
-        length = min(self.max_seq_len, len(sentence))
+        length = min(self.TEXT_SIZE, len(sentence))
 
-        sentence_tensor = torch.zeros(1, self.max_seq_length).long()
-        segment_tensor = torch.zeros(1, self.max_seq_length).long()
-        mask_tensor = torch.zeros(1, self.max_seq_length).long()
+        sentence_tensor = torch.zeros(1, self.TEXT_SIZE).long()
+        segment_tensor = torch.zeros(1, self.TEXT_SIZE).long()
+        mask_tensor = torch.zeros(1, self.TEXT_SIZE).long()
 
-        sentence_tensor[:length] = sentence[:length]
-        segment_tensor[:length] = segment[:length]
-        mask_tensor[:length] = 1
+        sentence_tensor[0][:length] = sentence[:length]
+        segment_tensor[0][:length] = segment[:length]
+        mask_tensor[0][:length] = 1
 
         return sentence_tensor, segment_tensor, mask_tensor
 

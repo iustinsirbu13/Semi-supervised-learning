@@ -11,14 +11,14 @@ class DisasterDatasetImage(Dataset):
     
     def __init__(self,
                  data,
-                 targets=None,
-                 num_classes=None,
-                 weak_transform=None,
+                 targets,
+                 num_classes,
+                 labels,
+                 weak_transform,
+                 img_dir,
+                 img_size,
                  strong_transform=None,
-                 labels=[],
-                 img_dir=None,
-                 img_size=224,
-                 *args, 
+                 *args,
                  **kwargs):
         
         super(DisasterDatasetImage, self).__init__()
