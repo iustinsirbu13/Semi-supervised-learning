@@ -11,6 +11,8 @@ class FixMatchMMBTWrapper(FixMatchDisasterWrapper):
 
         self.tokenizer = self.get_tokenizer(config).tokenize
         self.vocab = self.get_vocab(config)
+        
+        config.vocab = self.vocab
 
         super().__init__(config)
 

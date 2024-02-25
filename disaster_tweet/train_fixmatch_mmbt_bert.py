@@ -1,13 +1,14 @@
 import sys
 sys.path.append("..")
 
+import torch
 from semilearn import get_config
 from disaster_tweet.wrappers.fixmatch_mmbt_bert_wrapper import FixMatchMMBTBertWrapper
 
 def parse_config():
     config = {
         # optimization configs
-        'epoch': 1,  
+        'epoch': 1,
         'num_train_iter': 10, 
         'num_eval_iter': 5,   
         'num_log_iter': 5,    
@@ -42,7 +43,15 @@ def parse_config():
         'distributed': False,
     }
     
-    return get_config(config)
+    config = get_config(config)
+    
+
+    if config.gpu == -1:
+        config.device = 'cpu'
+    else:
+        config.device = torch.device('cuda', config.gpu)
+    
+    return config
 
 
 def main():

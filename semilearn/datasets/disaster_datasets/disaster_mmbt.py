@@ -134,7 +134,7 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
             items['lb_weak_segment'] = weak_text_tensors[1]
             items['lb_weak_mask'] = weak_text_tensors[2]
 
-            items['target'] = torch.tensor([target]).long()
+            items['lb_target'] = torch.LongTensor([target])
         else:
             items['ulb_weak_image'] = weak_image
             items['ulb_strong_image'] = strong_image

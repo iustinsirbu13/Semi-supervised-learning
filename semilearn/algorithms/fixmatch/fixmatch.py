@@ -110,5 +110,5 @@ class FixMatch(AlgorithmBase):
         return [
             SSL_Argument('--hard_label', str2bool, True),
             SSL_Argument('--T', float, 0.5),
-            SSL_Argument('--p_cutoff', float, 0.95),
+            SSL_Argument('--p_cutoff', float, 0.95)
         ]

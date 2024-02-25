@@ -70,16 +70,16 @@ class FixMatchBaseWrapper:
         self.unlabeled_loader = get_data_loader(config, self.unlabeled_dataset, config.batch_size * config.uratio)
 
 
-    def train(self):
-        trainer = Trainer(self.config, self.algorithm)
+    def train(self, T=Trainer):
+        trainer = T(self.config, self.algorithm)
         trainer.fit(self.train_loader, self.unlabeled_loader, self.test_loader)
         return trainer
 
     def evaluate(self, trainer):
         trainer.evaluate(self.test_loader)
 
-    def train_evaluate(self):
-        trainer = self.train()
+    def train_evaluate(self, T=Trainer):
+        trainer = self.train(T)
         self.evaluate(trainer)
 
     ########################

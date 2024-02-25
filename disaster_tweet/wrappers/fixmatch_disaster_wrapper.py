@@ -27,6 +27,21 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
             config.num_entries_per_class = config.num_labels // config.num_classes
         else:
             config.num_entries_per_class = 0
+
+        if not has_argument(config, 'hard_label'):
+            config.hard_label = True
+
+        if not has_argument(config, 'p_cutoff'):
+            config.p_cutoff = 0.95
+
+        if not has_argument(config, 'uratio'):
+            config.uratio = 2
+
+        if not has_argument(config, 'ulb_loss_ratio'):
+            config.ulb_loss_ratio = 1
+
+        if not has_argument(config, 'T'):
+            config.T = 0.5
         
         super().__init__(config)
     

@@ -112,23 +112,8 @@ class Trainer:
         y_logits = []
         with torch.no_grad():
             for data in data_loader:
-                x = data['x_lb']
-                y = data['y_lb']
-
-                if isinstance(x, dict):
-                    # Remove CUDA!!!
-                    # x = {k: v.cuda(self.config.gpu) for k, v in x.items()}
-                    x = {k: v for k, v in x.items()}
-                else:
-                    # Remove CUDA!!!
-                    # x = x.cuda(self.config.gpu)
-                    x = x
-
-                # Remove CUDA!!!    
-                # y = y.cuda(self.config.gpu)
-                y = y
-
-                logits = self.algorithm.model(x)['logits']
+                logits = self.algorithm.get_logits(data, 'logits')
+                y = self.algorithm.get_targets(data)
                     
                 y_true.extend(y.cpu().tolist())
                 y_pred.extend(torch.max(logits, dim=-1)[1].cpu().tolist())

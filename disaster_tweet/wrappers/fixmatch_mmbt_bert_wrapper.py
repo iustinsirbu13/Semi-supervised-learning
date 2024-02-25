@@ -17,12 +17,6 @@ class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):
         config.algorithm = 'fixmatch_mmbt_bert'
         config.net = 'mmbt_bert'
 
-        self.fill_optional_config(config)
-
-        super().__init__(config)
-    
-
-    def fill_optional_config(self, config):
         if not has_argument(config, 'img_size'):
             config.img_size = 224
         
@@ -51,6 +45,7 @@ class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):
         if not has_argument(config, 'max_seq_length'):
             config.max_seq_length = 512
 
+        super().__init__(config)
 
     # @overrides
     def get_tokenizer(self, config):
