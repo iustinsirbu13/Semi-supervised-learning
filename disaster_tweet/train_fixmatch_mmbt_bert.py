@@ -44,7 +44,6 @@ def parse_config():
     }
     
     config = get_config(config)
-    
 
     if config.gpu == -1:
         config.device = 'cpu'

@@ -1,6 +1,8 @@
 import sys
 sys.path.append("..")
 
+import torch
+
 from semilearn import get_config
 from wrappers.fixmatch_img_wrapper import FixMatchImgWrapper
 
@@ -44,7 +46,14 @@ def parse_config():
         'distributed': False,
     }
     
-    return get_config(config)
+    config = get_config(config)
+
+    if config.gpu == -1:
+        config.device = 'cpu'
+    else:
+        config.device = torch.device('cuda', config.gpu)
+    
+    return config
 
 
 def main():
