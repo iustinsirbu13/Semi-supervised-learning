@@ -288,13 +288,10 @@ class AlgorithmBase:
 
             # send var to cuda
             if isinstance(var, dict):
-                # Remove CUDA!!!
-                # var = {k: v.cuda(self.gpu) for k, v in var.items()}
-                var = {k: v for k, v in var.items()}
+                var = {k: v.to(self.args.device) for k, v in var.items()}
             else:
-                # Remove CUDA!!!
-                # var = var.cuda(self.gpu)
-                var = var
+                var = var.to(self.args.device)
+                
             input_dict[arg] = var
         return input_dict
 

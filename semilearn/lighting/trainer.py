@@ -19,9 +19,9 @@ class Trainer:
         self.algorithm = algorithm
 
         # TODO: support distributed training?
-        # Remove CUDA!!!
-        # torch.cuda.set_device(config.gpu)
-        # self.algorithm.model = self.algorithm.model.cuda(config.gpu)
+        if config.gpu != -1:
+            torch.cuda.set_device(config.gpu)
+            self.algorithm.model = self.algorithm.model.cuda(config.gpu)
 
         # setup logger
         self.save_path = os.path.join(config.save_dir, config.save_name)
