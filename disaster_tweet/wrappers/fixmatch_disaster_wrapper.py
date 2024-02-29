@@ -1,5 +1,6 @@
 from torchvision import transforms
 
+import torch
 from utils.arg_check import has_argument
 from utils.randaugment import RandAugmentMC
 
@@ -7,9 +8,11 @@ from wrappers.fixmatch_base_wrapper import FixMatchBaseWrapper
 
 class FixMatchDisasterWrapper(FixMatchBaseWrapper):
 
-    def __init__(self, config):
+    def __init__(self, config, build_algo):
         assert has_argument(config, 'data_dir')
-        config.dataset = 'CrisisMMD'
+        
+        assert has_argument(config, 'dataset')
+        assert config.dataset == 'disaster'
 
         assert has_argument(config, 'task')
         if config.task == 'humanitarian':
@@ -42,8 +45,17 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
 
         if not has_argument(config, 'T'):
             config.T = 0.5
+
+        if config.gpu is None or config.gpu == 'None':
+            config.gpu = None
+            config.device = 'cpu'
+        else:
+            config.device = torch.device('cuda', config.gpu)
+
+        if not has_argument(config, 'build_algo'):
+            config.build_algo = True
         
-        super().__init__(config)
+        super().__init__(config, build_algo)
     
         
     def get_weak_image_transform(self, img_size, crop_ratio):

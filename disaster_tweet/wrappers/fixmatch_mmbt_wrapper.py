@@ -5,7 +5,7 @@ from wrappers.fixmatch_disaster_wrapper import FixMatchDisasterWrapper
 
 class FixMatchMMBTWrapper(FixMatchDisasterWrapper):
 
-    def __init__(self, config):
+    def __init__(self, config, build_algo):
         assert has_argument(config, 'weak_text_tag')
         assert has_argument(config, 'strong_text_tag')
 
@@ -14,7 +14,7 @@ class FixMatchMMBTWrapper(FixMatchDisasterWrapper):
         
         config.vocab = self.vocab
 
-        super().__init__(config)
+        super().__init__(config, build_algo)
 
 
     # @overrides

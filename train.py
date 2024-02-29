@@ -361,6 +361,9 @@ def main_worker(gpu, ngpus_per_node, args):
     logger = get_logger(args.save_name, save_path, logger_level)
     logger.info(f"Use GPU: {args.gpu} for training")
 
+    from disaster_tweet.wrappers.build import build_wrapper
+    args.wrapper = build_wrapper(args.dataset, args.algorithm, args, build_algo=False)
+
     _net_builder = get_net_builder(args.net, args.net_from_name)
     # optimizer, scheduler, datasets, dataloaders with be set in algorithms
     if args.imb_algorithm is not None:

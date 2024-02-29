@@ -10,8 +10,8 @@ from wrappers.fixmatch_disaster_wrapper import FixMatchDisasterWrapper
 
 class FixMatchImgWrapper(FixMatchDisasterWrapper):
 
-    def __init__(self, config):
-        config.algorithm = 'fixmatch'
+    def __init__(self, config, build_algo=True):
+        assert config.algorithm == 'fixmatch'
 
         assert has_argument(config, 'net')
         if config.net in ['vit_tiny_patch2_32', 'vit_small_patch2_32']:
@@ -21,7 +21,7 @@ class FixMatchImgWrapper(FixMatchDisasterWrapper):
         else:
             raise Exception(f'Net {config.net} is not supported')
 
-        super().__init__(config)
+        super().__init__(config, build_algo)
 
     # @overrides
     def get_dataset(self, x, targets, weak_image_transform, strong_image_transform=None):

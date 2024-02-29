@@ -129,20 +129,20 @@ def get_config(config):
     parser.add_argument('--c', type=str, default='')
 
     # add algorithm specific parameters
-    args = parser.parse_args("")
+    args = parser.parse_args()
     over_write_args_from_dict(args, config)
     for argument in name2alg[args.algorithm].get_argument():
         parser.add_argument(argument.name, type=argument.type, default=argument.default, help=argument.help)
 
 
     # add imbalanced algorithm specific parameters
-    args = parser.parse_args("")
+    args = parser.parse_args()
     over_write_args_from_dict(args, config)
     if args.imb_algorithm is not None:
         for argument in name2imbalg[args.imb_algorithm].get_argument():
             parser.add_argument(argument.name, type=argument.type, default=argument.default, help=argument.help)
 
-    args = parser.parse_args("")    
+    args = parser.parse_args()    
     over_write_args_from_dict(args, config)
 
 

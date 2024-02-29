@@ -4,7 +4,7 @@
 import os
 import torch
 import torch.nn as nn
-import ruamel.yaml as yaml
+import yaml
 from torch.utils.tensorboard import SummaryWriter
 
 def over_write_args_from_dict(args, dict):
@@ -19,10 +19,11 @@ def over_write_args_from_file(args, yml):
     """
     overwrite arguments according to config file
     """
+    
     if yml == '':
         return
     with open(yml, 'r', encoding='utf-8') as f:
-        dic = yaml.load(f.read(), Loader=yaml.Loader)
+        dic = yaml.safe_load(f)
         for k in dic:
             setattr(args, k, dic[k])
 
@@ -38,7 +39,7 @@ def setattr_cls_from_kwargs(cls, kwargs):
 
 def send_model_cuda(args, model, clip_batch=True):
     if not torch.cuda.is_available():
-        raise Exception('ONLY GPU TRAINING IS SUPPORTED')
+        pass
     elif args.distributed:
         ngpus_per_node = torch.cuda.device_count()  # number of gpus of each node
 
