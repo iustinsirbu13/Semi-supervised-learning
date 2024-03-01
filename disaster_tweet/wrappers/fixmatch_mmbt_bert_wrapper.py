@@ -2,13 +2,10 @@ import sys
 sys.path.append('../..')
 
 from pytorch_pretrained_bert import BertTokenizer
-
-from utils.arg_check import has_argument
-from utils.vocab import Vocab
-
+from disaster_tweet.utils.arg_check import has_argument
+from disaster_tweet.utils.vocab import Vocab
 from semilearn.datasets.disaster_datasets.disaster_mmbt import DisasterDatasetMMBT
-
-from wrappers.fixmatch_mmbt_wrapper import FixMatchMMBTWrapper
+from disaster_tweet.wrappers.fixmatch_mmbt_wrapper import FixMatchMMBTWrapper
 
 
 class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):

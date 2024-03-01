@@ -1,10 +1,8 @@
-from torchvision import transforms
-
 import torch
-from utils.arg_check import has_argument
-from utils.randaugment import RandAugmentMC
-
-from wrappers.fixmatch_base_wrapper import FixMatchBaseWrapper
+from torchvision import transforms
+from disaster_tweet.utils.arg_check import has_argument
+from disaster_tweet.utils.randaugment import RandAugmentMC
+from disaster_tweet.wrappers.fixmatch_base_wrapper import FixMatchBaseWrapper
 
 class FixMatchDisasterWrapper(FixMatchBaseWrapper):
 

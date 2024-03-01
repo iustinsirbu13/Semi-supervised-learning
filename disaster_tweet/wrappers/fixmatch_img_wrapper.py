@@ -1,11 +1,11 @@
 import sys
 sys.path.append('../..')
 
-from utils.arg_check import has_argument
+from disaster_tweet.utils.arg_check import has_argument
 
 from semilearn.datasets.disaster_datasets.disaster_img import DisasterDatasetImage
 
-from wrappers.fixmatch_disaster_wrapper import FixMatchDisasterWrapper
+from disaster_tweet.wrappers.fixmatch_disaster_wrapper import FixMatchDisasterWrapper
 
 
 class FixMatchImgWrapper(FixMatchDisasterWrapper):

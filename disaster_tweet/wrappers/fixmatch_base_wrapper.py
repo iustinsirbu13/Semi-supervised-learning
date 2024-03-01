@@ -1,10 +1,10 @@
 import sys
 sys.path.append('../..')
 
-import os, random, jsonlines
-
+import os
+import random
+import jsonlines
 from semilearn import get_data_loader, get_net_builder, get_algorithm, Trainer
-
 
 class FixMatchBaseWrapper:
     def __init__(self, config, build_algo):

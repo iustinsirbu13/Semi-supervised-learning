@@ -352,9 +352,9 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # SET save_path and logger
     save_path = os.path.join(args.save_dir, args.save_name)
-    logger_level = "WARNING"
+    logger_level = "INFO"
     tb_log = None
-    if args.rank % ngpus_per_node == 0:
+    if ngpus_per_node != 0 and args.rank % ngpus_per_node == 0:
         tb_log = TBLog(save_path, "tensorboard", use_tensorboard=args.use_tensorboard)
         logger_level = "INFO"
 
@@ -363,6 +363,10 @@ def main_worker(gpu, ngpus_per_node, args):
 
     from disaster_tweet.wrappers.build import build_wrapper
     args.wrapper = build_wrapper(args.dataset, args.algorithm, args, build_algo=False)
+
+    logger.info(f"Print config: ")
+    for k, v in vars(args).items():
+        logger.info(f"\t{k}: {v}")
 
     _net_builder = get_net_builder(args.net, args.net_from_name)
     # optimizer, scheduler, datasets, dataloaders with be set in algorithms
