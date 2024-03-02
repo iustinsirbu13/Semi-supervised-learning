@@ -414,6 +414,11 @@ def main_worker(gpu, ngpus_per_node, args):
 
     logging.warning(f"GPU {args.rank} training is FINISHED")
 
+    if wrapper is not None:
+        logging.warning(f"GPU {args.rank} test STARTING")
+        trainer.evaluate(wrapper.test_loader)
+        logging.warning(f"GPU {args.rank} test is FINISHED")
+
 
 if __name__ == "__main__":
     args = get_config()
