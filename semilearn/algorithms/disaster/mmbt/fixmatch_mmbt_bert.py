@@ -53,7 +53,7 @@ class FixMatchMMBTBert(FixMatchDisaster):
         log_dict = self.process_log_dict(sup_loss=lb_loss.item(), 
                                          unsup_loss=ulb_loss.item(), 
                                          total_loss=loss.item(), 
-                                         util_ratio=threshold_mask.mean().item())
+                                         util_ratio=threshold_mask.float().mean().item())
         
         return out_dict, log_dict
 

@@ -67,7 +67,7 @@ class WideResNetMultihead(nn.Module):
         out = self.conv1(x)
         out = self.block1(out)
         out = self.block2(out)
-        return [self.relu(head_bn1(out)) for head_bn1 in self.bn1]
+        return [self.relu(head_bn1(head_block3(out))) for head_block3, head_bn1 in zip(self.block3, self.bn1)]
 
     def group_matcher(self, coarse=False, prefix=''):
         matcher = dict(stem=r'^{}conv1'.format(prefix), blocks=r'^{}block(\d+)'.format(prefix) if coarse else r'^{}block(\d+)\.layer.(\d+)'.format(prefix))
@@ -89,11 +89,11 @@ class WideResNetMultihead(nn.Module):
         return chain(super().modules(), self.block3, self.bn1, self.classifier)
 
 
-def wrn_multihead(num_heads, depth, widen_factor):
-    return WideResNetMultihead(first_stride=1, num_heads=num_heads, depth=depth, widen_factor=widen_factor)
+def wrn_multihead(num_classes, num_heads, depth, widen_factor):
+    return WideResNetMultihead(first_stride=1, num_classes=num_classes, num_heads=num_heads, depth=depth, widen_factor=widen_factor)
 
 def wrn_multihead_28_2(args):
-    return wrn_multihead(args.num_heads, 28, 2)
+    return wrn_multihead(args.num_classes, args.num_heads, 28, 2)
 
 def wrn_multihead_28_8(args):
-    return wrn_multihead(args.num_heads, 28, 8)
+    return wrn_multihead(args.num_classes, args.num_heads, 28, 8)

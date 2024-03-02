@@ -46,16 +46,16 @@ class FixMatchDisaster(AlgorithmBase):
             max_probs, _ = torch.max(ulb_weak_logits_norm, dim=-1)
             pseudo_labels = ulb_weak_logits_norm
 
-        threshold_mask = max_probs.ge(self.p_cutoff).float()
+        threshold_mask = max_probs.ge(self.p_cutoff)
 
         return pseudo_labels, threshold_mask
 
     def get_unsupervised_loss(self, ulb_strong_logits, pseudo_labels, threshold_mask):
         # Should work for both "hard" and "soft" labels (if "soft" labels are used, threshold_mask is ignored)
-        entropy = F.cross_entropy(ulb_strong_logits, pseudo_labels, reduction='none')
         if self.hard_label:
-            return (threshold_mask * entropy).mean()
-        return entropy.mean()
+            ulb_strong_logits = ulb_strong_logits[threshold_mask == 1]
+            pseudo_labels = pseudo_labels[threshold_mask == 1]
+        return F.cross_entropy(ulb_strong_logits, pseudo_labels)
 
     def get_loss(self, lb_loss, ulb_loss):
         # ToDo: Add support for linear lambda_u
