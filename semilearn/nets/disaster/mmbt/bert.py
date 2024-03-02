@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 from pytorch_pretrained_bert.modeling import BertModel
 
-from semilearn.nets.mmbt.utils.image import ImageEncoder
+from semilearn.nets.disaster.mmbt.utils.image import ImageEncoder
 
 
 class ImageBertEmbeddings(nn.Module):
@@ -122,8 +122,3 @@ class MultimodalBertClf(nn.Module):
 def mmbt_bert(args):
     model = MultimodalBertClf(args)
     return model
-
-
-if __name__ == '__main__':
-    model = mmbt_bert()
-    print(model)
