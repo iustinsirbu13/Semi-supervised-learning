@@ -42,11 +42,11 @@ class FixMatchDisaster(AlgorithmBase):
             # max probability for each logit tensor
             # index with highest probability for each logit tensor
             max_probs, pseudo_labels = torch.max(ulb_weak_logits_norm, dim=-1)
-            threshold_mask = max_probs.ge(self.p_cutoff).float()
         else:
             pseudo_labels = ulb_weak_logits_norm
-            threshold_mask = torch.ones(pseudo_labels.shape[0]).float()
 
+        threshold_mask = max_probs.ge(self.p_cutoff).float()
+        
         return pseudo_labels, threshold_mask
 
     def get_unsupervised_loss(self, ulb_strong_logits, pseudo_labels, threshold_mask):
