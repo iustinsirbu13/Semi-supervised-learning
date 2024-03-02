@@ -1,5 +1,5 @@
 import torch
-import torch.nn.functional as F
+
 
 from semilearn.algorithms.disaster.fixmatch_disaster import FixMatchDisaster
 from semilearn.core.utils import ALGORITHMS
@@ -37,24 +37,17 @@ class FixMatchMMBTBert(FixMatchDisaster):
         lb_logits = logits[:lb_batch_size]
         ulb_weak_logits, ulb_strong_logits = logits[lb_batch_size:].chunk(2)
 
-        # ToDo: Add configurable loss calculation (soft-pseudolabels, linear unsupervised loss, etc.)
-
         # Supervised loss
-        lb_loss = F.cross_entropy(lb_logits, lb_target)
+        lb_loss = self.get_supervised_loss(lb_logits, lb_target)
 
-        # Compute pseudo-labels
-        # ulb_weak_logits_norm = normalized logits (range [0, 1])
-        # max_probs = max probability for each logit tensor
-        # pseudo_labels = index with highest probability for each logit tensor
-        ulb_weak_logits_norm = torch.softmax(ulb_weak_logits.detach(), dim=-1)
-        max_probs, pseudo_labels = torch.max(ulb_weak_logits_norm, dim=-1)
-        threshold_mask = max_probs.ge(self.p_cutoff).float()
+        # Pseudo labels + threshold mask
+        pseudo_labels, threshold_mask = self.get_pseudo_labels(ulb_weak_logits)
 
         # Unsupervised loss
-        ulb_loss = (threshold_mask * F.cross_entropy(ulb_strong_logits, pseudo_labels, reduction='none')).mean()
+        ulb_loss = self.get_unsupervised_loss(ulb_strong_logits, pseudo_labels, threshold_mask)
 
         # Total loss
-        loss = lb_loss + self.lambda_u * ulb_loss
+        loss = self.get_loss(lb_loss, ulb_loss)
 
         out_dict = self.process_out_dict(loss=loss)
         log_dict = self.process_log_dict(sup_loss=lb_loss.item(), 

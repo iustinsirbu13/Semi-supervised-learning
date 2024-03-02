@@ -2,8 +2,8 @@ algorithm: fixmatch_mmbt_bert
 
 # optimization configs
 epoch: 1
-num_train_iter: 10 
-num_eval_iter: 5   
+num_train_iter: 2 
+num_eval_iter: 1   
 num_log_iter: 5    
 optim: AdamW
 lr: 0.0005
@@ -26,7 +26,7 @@ weak_text_tag: eda_02
 strong_text_tag: back_translate
 
 # algorithm specific configs
-hard_label: True
+hard_label: False
 uratio: 2
 ulb_loss_ratio: 1.0
 
