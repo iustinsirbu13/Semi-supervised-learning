@@ -13,6 +13,7 @@ import torch.backends.cudnn as cudnn
 import torch.distributed as dist
 import torch.multiprocessing as mp
 import torch.nn.parallel
+from semilearn import Trainer
 from semilearn.algorithms import get_algorithm, name2alg
 from semilearn.core.utils import (
     TBLog,
@@ -352,14 +353,22 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # SET save_path and logger
     save_path = os.path.join(args.save_dir, args.save_name)
-    logger_level = "WARNING"
+    logger_level = "INFO"
     tb_log = None
-    if args.rank % ngpus_per_node == 0:
+    if ngpus_per_node != 0 and args.rank % ngpus_per_node == 0:
         tb_log = TBLog(save_path, "tensorboard", use_tensorboard=args.use_tensorboard)
         logger_level = "INFO"
 
     logger = get_logger(args.save_name, save_path, logger_level)
     logger.info(f"Use GPU: {args.gpu} for training")
+
+    from disaster_tweet.wrappers.build import build_wrapper
+    wrapper = build_wrapper(args.dataset, args.algorithm, args, build_algo=False)
+    args.wrapper = wrapper
+
+    logger.info(f"Print config: ")
+    for k, v in vars(args).items():
+        logger.info(f"\t{k}: {v}")
 
     _net_builder = get_net_builder(args.net, args.net_from_name)
     # optimizer, scheduler, datasets, dataloaders with be set in algorithms
@@ -390,17 +399,25 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # START TRAINING of FixMatch
     logger.info("Model training")
-    model.train()
-
-    # print validation (and test results)
-    for key, item in model.results_dict.items():
-        logger.info(f"Model result - {key} : {item}")
+    if wrapper is not None:
+        trainer = Trainer(args, model)
+        trainer.fit(wrapper.train_loader, wrapper.unlabeled_loader, wrapper.dev_loader)
+    else:
+        model.train()
+        # print validation (and test results)
+        for key, item in model.results_dict.items():
+            logger.info(f"Model result - {key} : {item}")
 
     if hasattr(model, "finetune"):
         logger.info("Finetune stage")
         model.finetune()
 
     logging.warning(f"GPU {args.rank} training is FINISHED")
+
+    if wrapper is not None:
+        logging.warning(f"GPU {args.rank} test STARTING")
+        trainer.evaluate(wrapper.test_loader)
+        logging.warning(f"GPU {args.rank} test is FINISHED")
 
 
 if __name__ == "__main__":

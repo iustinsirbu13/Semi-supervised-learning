@@ -2,19 +2,16 @@ import sys
 sys.path.append('../..')
 
 from pytorch_pretrained_bert import BertTokenizer
-
-from utils.arg_check import has_argument
-from utils.vocab import Vocab
-
+from disaster_tweet.utils.arg_check import has_argument
+from disaster_tweet.utils.vocab import Vocab
 from semilearn.datasets.disaster_datasets.disaster_mmbt import DisasterDatasetMMBT
-
-from wrappers.fixmatch_mmbt_wrapper import FixMatchMMBTWrapper
+from disaster_tweet.wrappers.fixmatch_mmbt_wrapper import FixMatchMMBTWrapper
 
 
 class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):
     
-    def __init__(self, config):
-        config.algorithm = 'fixmatch_mmbt_bert'
+    def __init__(self, config, build_algo=True):
+        assert config.algorithm == 'fixmatch_mmbt_bert'
         config.net = 'mmbt_bert'
 
         if not has_argument(config, 'img_size'):
@@ -45,7 +42,7 @@ class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):
         if not has_argument(config, 'max_seq_length'):
             config.max_seq_length = 512
 
-        super().__init__(config)
+        super().__init__(config, build_algo)
 
     # @overrides
     def get_tokenizer(self, config):

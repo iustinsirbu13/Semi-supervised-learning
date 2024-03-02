@@ -1,13 +1,13 @@
 import sys
 sys.path.append('../..')
 
-import os, random, jsonlines
-
+import os
+import random
+import jsonlines
 from semilearn import get_data_loader, get_net_builder, get_algorithm, Trainer
 
-
 class FixMatchBaseWrapper:
-    def __init__(self, config):
+    def __init__(self, config, build_algo):
         self.config = config
 
         # read train, dev and test datasets
@@ -19,8 +19,9 @@ class FixMatchBaseWrapper:
         self.unlabeled_x = self.read_unlabeled_dataset(config)
 
         # prepare USB algorithm
-        self.algorithm = get_algorithm(config,  get_net_builder(config.net, from_name=False), tb_log=None, logger=None)
-
+        if build_algo:
+            self.algorithm = get_algorithm(config,  get_net_builder(config.net, from_name=False), tb_log=None, logger=None)
+        
         # prepare USB datasets and loaders
         self.prepare_datasets(config)
         self.prepare_dataloaders(config)
@@ -72,7 +73,7 @@ class FixMatchBaseWrapper:
 
     def train(self, T=Trainer):
         trainer = T(self.config, self.algorithm)
-        trainer.fit(self.train_loader, self.unlabeled_loader, self.test_loader)
+        trainer.fit(self.train_loader, self.unlabeled_loader, self.dev_loader)
         return trainer
 
     def evaluate(self, trainer):

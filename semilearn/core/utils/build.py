@@ -8,8 +8,10 @@ import random
 import torch
 import torch.distributed as dist
 from torch.utils.data import DataLoader
+from disaster_tweet.utils.arg_check import has_argument
 from semilearn.datasets import get_collactor, name2sampler
 from semilearn.nets.utils import param_groups_layer_decay, param_groups_weight_decay
+
 
 def get_net_builder(net_name, from_name: bool):
     """
@@ -57,7 +59,7 @@ def get_logger(name, save_path=None, level='INFO'):
     return logger
 
 
-def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./data', include_lb_to_ulb=True):
+def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./data', include_lb_to_ulb=True, wrapper=None):
     """
     create dataset
 
@@ -101,6 +103,16 @@ def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./d
         lb_dset, ulb_dset, eval_dset, test_dset = get_pkl_dset(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
     elif dataset in ['aclImdb', 'ag_news', 'amazon_review', 'dbpedia', 'yahoo_answers', 'yelp_review']:
         lb_dset, ulb_dset, eval_dset, test_dset = get_json_dset(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
+    elif dataset in ['disaster']:
+        if has_argument(args, 'wrapper'):
+            wrapper = args.wrapper
+            lb_dset = wrapper.train_dataset
+            ulb_dset = wrapper.unlabeled_dataset
+            eval_dset = wrapper.dev_dataset
+            test_dset = wrapper.test_dataset
+        else:
+            lb_dset = ulb_dset = eval_dset = test_dset = []
+            
     else:
         return None
     

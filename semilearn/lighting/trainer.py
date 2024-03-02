@@ -19,7 +19,7 @@ class Trainer:
         self.algorithm = algorithm
 
         # TODO: support distributed training?
-        if config.gpu != -1:
+        if config.gpu is not None:
             torch.cuda.set_device(config.gpu)
             self.algorithm.model = self.algorithm.model.cuda(config.gpu)
 
