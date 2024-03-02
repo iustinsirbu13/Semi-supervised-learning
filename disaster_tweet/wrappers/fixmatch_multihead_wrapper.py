@@ -11,6 +11,9 @@ class FixMatchMultiheadWrapper(FixMatchClassicWrapper):
         assert config.algorithm == 'fixmatch_multihead'
         assert config.net in ['wrn_multihead_28_2', 'wrn_multihead_28_8']
         
+        if not has_argument(config.num_heads):
+            config.num_heads = 3
+        
         if not has_argument(config, 'img_size'):
             config.img_size = 224
 
