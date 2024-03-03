@@ -11,8 +11,7 @@ from disaster_tweet.wrappers.fixmatch_mmbt_wrapper import FixMatchMMBTWrapper
 class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):
     
     def __init__(self, config, build_algo=True):
-        assert config.algorithm == 'fixmatch_mmbt_bert'
-        config.net = 'mmbt_bert'
+        self.validate_algo(config)
 
         if not has_argument(config, 'img_size'):
             config.img_size = 224
@@ -44,6 +43,7 @@ class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):
 
         super().__init__(config, build_algo)
 
+
     # @overrides
     def get_tokenizer(self, config):
         return BertTokenizer.from_pretrained(config.bert_model, do_lower_case=True)
@@ -70,3 +70,8 @@ class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):
                         weak_text_tag=weak_text_tag,
                         strong_image_transform=strong_image_transform,
                         strong_text_tag=strong_text_tag)
+
+
+    def validate_algo(self, config):
+        assert config.algorithm == 'fixmatch_mmbt_bert'
+        config.net = 'mbbt_bert'

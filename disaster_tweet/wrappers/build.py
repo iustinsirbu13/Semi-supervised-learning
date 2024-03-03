@@ -2,6 +2,7 @@ class ALGO_WRAPPERS:
     FIXMATCH = 'fixmatch'
     FIXMATCH_MMBT_BERT = 'fixmatch_mmbt_bert'
     FIXMATCH_MULTIHEAD = 'fixmatch_multihead'
+    FIXMATCH_MULTIHEAD_MMBT_BERT = 'fixmatch_multihead_mmbt_bert'
 
 
 def build_wrapper(dataset, algorithm, config, build_algo=True):
@@ -19,6 +20,10 @@ def build_wrapper(dataset, algorithm, config, build_algo=True):
     elif algorithm == ALGO_WRAPPERS.FIXMATCH_MULTIHEAD:
         from disaster_tweet.wrappers.fixmatch_multihead_wrapper import FixMatchMultiheadWrapper
         return FixMatchMultiheadWrapper(config, build_algo)
+    
+    elif algorithm == ALGO_WRAPPERS.FIXMATCH_MULTIHEAD_MMBT_BERT:
+        from disaster_tweet.wrappers.fixmatch_multihead_mbbt_bert_wrapper import FixMatchMultiheadMMBTBertWrapper
+        return FixMatchMultiheadMMBTBertWrapper(config, build_algo)
     
     raise Exception(f'Unknown disaster algorithm: {algorithm}')
     
