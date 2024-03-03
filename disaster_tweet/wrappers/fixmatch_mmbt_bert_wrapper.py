@@ -1,6 +1,3 @@
-import sys
-sys.path.append('../..')
-
 from pytorch_pretrained_bert import BertTokenizer
 from disaster_tweet.utils.arg_check import has_argument
 from disaster_tweet.utils.vocab import Vocab

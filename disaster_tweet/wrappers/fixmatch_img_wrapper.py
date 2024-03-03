@@ -1,6 +1,3 @@
-import sys
-sys.path.append('../..')
-
 from disaster_tweet.wrappers.fixmatch_classic_wrapper import FixMatchClassicWrapper
 
 

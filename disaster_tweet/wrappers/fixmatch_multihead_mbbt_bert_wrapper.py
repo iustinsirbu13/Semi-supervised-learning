@@ -1,6 +1,3 @@
-import sys
-sys.path.append('../..')
-
 from disaster_tweet.utils.arg_check import has_argument
 from disaster_tweet.wrappers.fixmatch_mmbt_bert_wrapper import FixMatchMMBTBertWrapper
 

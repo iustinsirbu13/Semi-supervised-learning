@@ -1,6 +1,3 @@
-import sys
-sys.path.append('../..')
-
 from semilearn.datasets.disaster_datasets.disaster_img import DisasterDatasetImage
 from disaster_tweet.wrappers.fixmatch_disaster_wrapper import FixMatchDisasterWrapper
 
