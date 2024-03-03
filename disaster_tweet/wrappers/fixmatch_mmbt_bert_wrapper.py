@@ -1,4 +1,5 @@
 from pytorch_pretrained_bert import BertTokenizer
+from disaster_tweet.wrappers.build import ALGO_WRAPPERS
 from disaster_tweet.utils.arg_check import has_argument
 from disaster_tweet.utils.vocab import Vocab
 from semilearn.datasets.disaster_datasets.disaster_mmbt import DisasterDatasetMMBT
@@ -70,5 +71,5 @@ class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):
 
 
     def validate_algo(self, config):
-        assert config.algorithm == 'fixmatch_mmbt_bert'
+        assert config.algorithm == ALGO_WRAPPERS.FIXMATCH_MMBT_BERT
         config.net = 'mbbt_bert'

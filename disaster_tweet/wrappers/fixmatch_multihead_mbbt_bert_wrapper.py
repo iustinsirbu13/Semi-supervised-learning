@@ -1,3 +1,4 @@
+from disaster_tweet.wrappers.build import ALGO_WRAPPERS
 from disaster_tweet.utils.arg_check import has_argument
 from disaster_tweet.wrappers.fixmatch_mmbt_bert_wrapper import FixMatchMMBTBertWrapper
 
@@ -14,5 +15,5 @@ class FixMatchMultiheadMMBTBertWrapper(FixMatchMMBTBertWrapper):
 
     # @overrides
     def validate_algo(self, config):
-        assert config.algorithm == 'fixmatch_multihead_mmbt_bert'
+        assert config.algorithm == ALGO_WRAPPERS.FIXMATCH_MULTIHEAD_MMBT_BERT
         config.net = 'multihead_mmbt_bert'

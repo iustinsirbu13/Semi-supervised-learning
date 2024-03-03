@@ -1,10 +1,11 @@
+from disaster_tweet.wrappers.build import ALGO_WRAPPERS
 from disaster_tweet.wrappers.fixmatch_classic_wrapper import FixMatchClassicWrapper
 
 
 class FixMatchImgWrapper(FixMatchClassicWrapper):
 
     def __init__(self, config, build_algo=True):
-        assert config.algorithm == 'fixmatch'
+        assert config.algorithm == ALGO_WRAPPERS.FIXMATCH
 
         if config.net in ['vit_tiny_patch2_32', 'vit_small_patch2_32']:
             config.img_size = 32
