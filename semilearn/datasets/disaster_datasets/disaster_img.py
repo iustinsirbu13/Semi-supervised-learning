@@ -65,9 +65,10 @@ class DisasterDatasetImage(Dataset):
                 img_path = os.path.join(self.img_dir, img_name)
                 image = Image.open(img_path).convert('RGB')
             else:
-                image = self.__get_random_image__()
+                image = self.get_random_image()
         except:
-            image = self.__get_random_image__()
+            print(f'Error processing image {img_name}')
+            image = self.get_random_image()
 
         return image
     
