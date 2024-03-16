@@ -143,3 +143,6 @@ dmypy.json
 
 # Apptainer images
 *.sif
+
+# Slurm outputs
+*.out
