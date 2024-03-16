@@ -34,7 +34,7 @@ class FixMatchBaseWrapper:
             x = []
             for label in config.labels:
                 dataset_by_label = [row for row in dataset if row['label'] == label]
-                dataset_by_label = random.sample(dataset_by_label, num_entries_per_class)
+                dataset_by_label = random.sample(dataset_by_label, min(num_entries_per_class, len(dataset_by_label)))
                 x += dataset_by_label
 
         random.shuffle(x)
