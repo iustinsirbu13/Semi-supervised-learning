@@ -22,7 +22,9 @@ class FixMatchBaseWrapper:
         # prepare USB datasets and loaders
         self.prepare_datasets(config)
         self.prepare_dataloaders(config)
-    
+
+    def sample(self, dataset, num_samples):
+        return random.sample(dataset, min(num_samples, len(dataset)))
     
     def read_labeled_dataset(self, filename, config, num_entries_per_class=0):
         filepath = os.path.join(config.data_dir, filename)
@@ -34,7 +36,7 @@ class FixMatchBaseWrapper:
             x = []
             for label in config.labels:
                 dataset_by_label = [row for row in dataset if row['label'] == label]
-                dataset_by_label = random.sample(dataset_by_label, min(num_entries_per_class, len(dataset_by_label)))
+                dataset_by_label = self.sample(dataset_by_label, num_entries_per_class)
                 x += dataset_by_label
 
         random.shuffle(x)
@@ -55,7 +57,7 @@ class FixMatchBaseWrapper:
         filepath = os.path.join(config.data_dir, config.unlabeled_filename)
 
         dataset = [row for row in jsonlines.open(filepath)]
-        x = random.sample(dataset, len(self.train_x) * config.uratio)
+        x = self.sample(dataset, len(self.train_x) * config.uratio)
 
         random.shuffle(x)
 
