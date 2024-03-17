@@ -4,20 +4,20 @@ use_pretrain: True
 pretrain_path: https://github.com/microsoft/Semi-supervised-learning/releases/download/v.0.0.0/vit_tiny_patch2_32_mlp_im_1k_32.pth
 
 # optimization configs
-epoch: 1  
-num_train_iter: 10 
-num_eval_iter: 5   
-num_log_iter: 5    
+epoch: 20  
+num_train_iter: 10000
+num_eval_iter: 10000   
+num_log_iter: 50    
 optim: AdamW
 lr: 0.0005
 layer_decay: 0.5
-batch_size: 16
-eval_batch_size: 16
+batch_size: 64
+eval_batch_size: 64
 
 # dataset configs
 dataset: disaster
 task: humanitarian
-num_labels: 40
+num_labels: 0 
 crop_ratio: 0.875
 train_filename: train.jsonl
 dev_filename: dev.jsonl
@@ -28,7 +28,7 @@ img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
 
 # algorithm specific configs
 hard_label: True
-uratio: 2
+uratio: 3
 ulb_loss_ratio: 1.0
 
 # device configs
@@ -36,3 +36,10 @@ gpu: 0
 world_size: 1
 num_workers: 2
 distributed: False
+
+# test configs
+resume: True
+save_dir: ./saved_models
+save_name: fixmatch-img-eval
+load_path: ./saved_models/fixmatch-img/model_best.pth
+eval_only: True
