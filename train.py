@@ -227,6 +227,8 @@ def get_config():
     )
     # config file
     parser.add_argument("--c", type=str, default="")
+    # skip model training
+    parser.add_argument("--eval_only", type=bool, default=False)
 
     # add algorithm specific parameters
     args = parser.parse_args()
@@ -265,24 +267,35 @@ def main(args):
         args.num_train_iter % args.epoch == 0
     ), f"# total training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"  # noqa: E501
 
-    save_path = os.path.join(args.save_dir, args.save_name)
-    if os.path.exists(save_path) and args.overwrite and args.resume is False:
-        import shutil
+    if args.eval_only == False:
+        save_path = os.path.join(args.save_dir, args.save_name)
+        if os.path.exists(save_path) and args.overwrite and args.resume is False:
+            import shutil
 
-        shutil.rmtree(save_path)
-    if os.path.exists(save_path) and not args.overwrite:
-        raise Exception("already existing model: {}".format(save_path))
-    if args.resume:
+            shutil.rmtree(save_path)
+        if os.path.exists(save_path) and not args.overwrite:
+            raise Exception("already existing model: {}".format(save_path))
+        if args.resume:
+            if args.load_path is None:
+                raise Exception("Resume of training requires --load_path in the args")
+            if (
+                os.path.abspath(save_path) == os.path.abspath(args.load_path)
+                and not args.overwrite
+            ):
+                raise Exception(
+                    "Saving & Loading paths are same. \
+                                If you want over-write, give --overwrite in the argument."
+                )
+    else:
         if args.load_path is None:
-            raise Exception("Resume of training requires --load_path in the args")
-        if (
-            os.path.abspath(save_path) == os.path.abspath(args.load_path)
-            and not args.overwrite
-        ):
-            raise Exception(
-                "Saving & Loading paths are same. \
-                            If you want over-write, give --overwrite in the argument."
-            )
+            raise Exception("Eval only requires --load_path in the args")
+        
+        if not os.path.exists(args.load_path):
+            raise Exception(f"Load path {args.load_path} doesn't exist")
+        
+        if not args.resume:
+            raise Exception("Eval only requires resume=True")
+        
 
     if args.seed is not None:
         warnings.warn(
@@ -397,22 +410,23 @@ def main_worker(gpu, ngpus_per_node, args):
         logger.info(("Warmup stage"))
         model.warmup()
 
-    # START TRAINING of FixMatch
-    logger.info("Model training")
-    if wrapper is not None:
-        trainer = Trainer(args, model)
-        trainer.fit(wrapper.train_loader, wrapper.unlabeled_loader, wrapper.dev_loader)
-    else:
-        model.train()
-        # print validation (and test results)
-        for key, item in model.results_dict.items():
-            logger.info(f"Model result - {key} : {item}")
+    if args.eval_only == False:
+        # START TRAINING of FixMatch
+        logger.info("Model training")
+        if wrapper is not None:
+            trainer = Trainer(args, model)
+            trainer.fit(wrapper.train_loader, wrapper.unlabeled_loader, wrapper.dev_loader)
+        else:
+            model.train()
+            # print validation (and test results)
+            for key, item in model.results_dict.items():
+                logger.info(f"Model result - {key} : {item}")
 
-    if hasattr(model, "finetune"):
-        logger.info("Finetune stage")
-        model.finetune()
+        if hasattr(model, "finetune"):
+            logger.info("Finetune stage")
+            model.finetune()
 
-    logging.warning(f"GPU {args.rank} training is FINISHED")
+        logging.warning(f"GPU {args.rank} training is FINISHED")
 
     if wrapper is not None:
         logging.warning(f"GPU {args.rank} test STARTING")
