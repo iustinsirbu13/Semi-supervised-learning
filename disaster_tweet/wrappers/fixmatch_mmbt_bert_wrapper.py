@@ -72,4 +72,4 @@ class FixMatchMMBTBertWrapper(FixMatchMMBTWrapper):
 
     def validate_algo(self, config):
         assert config.algorithm == ALGO_WRAPPERS.FIXMATCH_MMBT_BERT
-        config.net = 'mbbt_bert'
+        config.net = 'mmbt_bert'

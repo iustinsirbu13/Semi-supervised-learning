@@ -1,0 +1,43 @@
+algorithm: fixmatch_mmbt_bert
+
+# optimization configs
+epoch: 20
+num_train_iter: 10000 
+num_eval_iter: 10000   
+num_log_iter: 50    
+optim: AdamW
+lr: 0.0005
+layer_decay: 0.5
+batch_size: 8
+eval_batch_size: 8
+
+# dataset configs
+dataset: disaster
+task: humanitarian
+num_labels: 600
+crop_ratio: 0.875
+img_size: 224
+train_filename: train_eda.jsonl
+dev_filename: dev.jsonl
+test_filename: test.jsonl
+unlabeled_filename: unlabeled_eda.jsonl
+data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian_orig
+img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
+weak_text_tag: text
+strong_text_tag: text
+
+# algorithm specific configs
+hard_label: True
+uratio: 3
+ulb_loss_ratio: 1.0
+
+# device configs
+gpu: 0
+world_size: 1
+num_workers: 2
+distributed: False
+
+# test configs
+save_dir: ./saved_models
+save_name: fixmatch-mmbt-bert-hard
+overwrite: False

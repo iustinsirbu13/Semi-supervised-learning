@@ -1,0 +1,42 @@
+algorithm: fixmatch_multihead
+net: wrn_multihead_28_2
+
+# optimization configs
+epoch: 20
+num_train_iter: 10000
+num_eval_iter: 10000 
+num_log_iter: 50
+optim: AdamW
+lr: 0.0005
+layer_decay: 0.5
+batch_size: 64
+eval_batch_size: 64
+
+# dataset configs
+dataset: disaster
+task: humanitarian
+num_labels: 0
+crop_ratio: 0.875
+train_filename: train.jsonl
+dev_filename: dev.jsonl
+test_filename: test.jsonl
+unlabeled_filename: unlabeled_eda.jsonl
+data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian_orig
+img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
+
+# algorithm specific configs
+hard_label: True
+uratio: 3
+ulb_loss_ratio: 1.0
+
+# device configs
+gpu: 0
+world_size: 1
+num_workers: 2
+distributed: False
+
+# test configs
+resume: True
+save_dir: ./saved_models
+save_name: fixmatch-multihead-eval
+eval_only: True
