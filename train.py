@@ -409,12 +409,14 @@ def main_worker(gpu, ngpus_per_node, args):
     if hasattr(model, "warmup"):
         logger.info(("Warmup stage"))
         model.warmup()
+    
+    if wrapper is not None:
+            trainer = Trainer(args, model)
 
     if args.eval_only == False:
         # START TRAINING of FixMatch
         logger.info("Model training")
         if wrapper is not None:
-            trainer = Trainer(args, model)
             trainer.fit(wrapper.train_loader, wrapper.unlabeled_loader, wrapper.dev_loader)
         else:
             model.train()
