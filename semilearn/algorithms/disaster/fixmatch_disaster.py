@@ -53,8 +53,12 @@ class FixMatchDisaster(AlgorithmBase):
     def get_unsupervised_loss(self, ulb_strong_logits, pseudo_labels, threshold_mask):
         # Should work for both "hard" and "soft" labels (if "soft" labels are used, threshold_mask is ignored)
         if self.hard_label:
+            if 1 not in threshold_mask:
+                return torch.tensor(0).to(self.args.device)
+
             ulb_strong_logits = ulb_strong_logits[threshold_mask == 1]
             pseudo_labels = pseudo_labels[threshold_mask == 1]
+
         return F.cross_entropy(ulb_strong_logits, pseudo_labels)
 
     def get_loss(self, lb_loss, ulb_loss):

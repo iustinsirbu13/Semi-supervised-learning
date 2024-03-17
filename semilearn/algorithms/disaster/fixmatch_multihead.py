@@ -83,6 +83,7 @@ class FixMatchMultihead(FixMatchDisaster):
         num_ulb = x_ulb_w.shape[0]
        
         inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s))
+        inputs = inputs.to(self.args.device)
         logits = self.model(inputs)['logits']
         
         logits_x_lb = torch.zeros(self.num_heads, num_lb, self.num_classes).to(self.args.device)
