@@ -6,6 +6,16 @@ from disaster_tweet.wrappers.fixmatch_base_wrapper import FixMatchBaseWrapper
 
 class FixMatchDisasterWrapper(FixMatchBaseWrapper):
 
+    PRECOMPUTED_MEANS = {
+        'CrisisMMD/informative_orig': (0.485, 0.456, 0.406),    # ImageNet
+        'CrisisMMD/humanitarian_orig': (0.485, 0.456, 0.406),   # ImageNet
+    }
+
+    PRECOMPUTED_STDS = {
+        'CrisisMMD/informative_orig': (0.229, 0.224, 0.225),    # ImageNet
+        'CrisisMMD/humanitarian_orig': (0.229, 0.224, 0.225),   # ImageNet
+    }
+
     def __init__(self, config, build_algo):
         assert has_argument(config, 'data_dir')
         
@@ -54,6 +64,17 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
             config.build_algo = True
         
         super().__init__(config, build_algo)
+
+
+    def get_mean(self):
+        if self.config.task in FixMatchDisasterWrapper.PRECOMPUTED_MEANS:
+            return FixMatchDisasterWrapper.PRECOMPUTED_MEANS[self.config.task]
+        return [0.5, 0.5, 0.5]
+
+    def get_std(self):
+        if self.config.task in FixMatchDisasterWrapper.PRECOMPUTED_STDS:
+            return FixMatchDisasterWrapper.PRECOMPUTED_STDS[self.config.task]
+        return [0.5, 0.5, 0.5]
     
         
     def get_weak_image_transform(self, img_size, crop_ratio):
@@ -62,7 +83,7 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
                                 transforms.RandomHorizontalFlip(),
                                 transforms.RandomCrop(size=img_size, padding=int(img_size * (1.0 - crop_ratio)), padding_mode='reflect'),
                                 transforms.ToTensor(),
-                                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+                                transforms.Normalize(mean=self.get_mean(), std=self.get_std())
                             ])
     
     def get_strong_image_transform(self, img_size, crop_ratio):
@@ -72,7 +93,7 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
                                 transforms.RandomCrop(size=img_size, padding=int(img_size * (1.0 - crop_ratio)), padding_mode='reflect'),
                                 RandAugmentMC(n=2, m=10),
                                 transforms.ToTensor(),
-                                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+                                transforms.Normalize(mean=self.get_mean(), std=self.get_std())
                             ])
 
     def get_eval_image_transform(self, img_size):
@@ -80,7 +101,7 @@ class FixMatchDisasterWrapper(FixMatchBaseWrapper):
                                     transforms.Resize(img_size),
                                     transforms.CenterCrop(size=img_size),
                                     transforms.ToTensor(),
-                                    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+                                    transforms.Normalize(mean=self.get_mean(), std=self.get_std())
                                 ])
 
 
