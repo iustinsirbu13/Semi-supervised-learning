@@ -411,7 +411,7 @@ def main_worker(gpu, ngpus_per_node, args):
         model.warmup()
     
     if wrapper is not None:
-            trainer = Trainer(args, model)
+        trainer = Trainer(args, model)
 
     if args.eval_only == False:
         # START TRAINING of FixMatch

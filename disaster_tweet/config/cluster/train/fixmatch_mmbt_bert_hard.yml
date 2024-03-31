@@ -14,7 +14,7 @@ eval_batch_size: 8
 # dataset configs
 dataset: disaster
 task: humanitarian
-num_labels: 600
+num_labels: 0
 crop_ratio: 0.875
 img_size: 224
 train_filename: train_eda.jsonl
@@ -23,8 +23,8 @@ test_filename: test.jsonl
 unlabeled_filename: unlabeled_eda.jsonl
 data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian_orig
 img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
-weak_text_tag: text
-strong_text_tag: text
+weak_text_tag: eda_02
+strong_text_tag: back_translate
 
 # algorithm specific configs
 hard_label: True
