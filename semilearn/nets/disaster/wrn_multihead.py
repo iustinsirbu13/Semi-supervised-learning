@@ -88,6 +88,17 @@ class WideResNetMultihead(nn.Module):
         from itertools import chain
         return chain(super().modules(), self.block3, self.bn1, self.classifier)
 
+    # @overrides
+    def cuda(self, device=None):
+        obj = super().cuda(device)
+        for id in range(len(self.block3)):
+            obj.block3[id] = self.block3[id].cuda(device)
+        for id in range(len(self.bn1)):
+            obj.bn1[id] = self.bn1[id].cuda(device)
+        for id in range(len(self.classifier)):
+            obj.classifier[id] = self.classifier[id].cuda(device)
+        return obj 
+
 
 def wrn_multihead(num_classes, num_heads, depth, widen_factor):
     return WideResNetMultihead(first_stride=1, num_classes=num_classes, num_heads=num_heads, depth=depth, widen_factor=widen_factor)
