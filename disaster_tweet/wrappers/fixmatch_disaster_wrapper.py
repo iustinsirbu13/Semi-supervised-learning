@@ -7,13 +7,13 @@ from disaster_tweet.wrappers.fixmatch_base_wrapper import FixMatchBaseWrapper
 class FixMatchDisasterWrapper(FixMatchBaseWrapper):
 
     PRECOMPUTED_MEANS = {
-        'CrisisMMD/informative_orig': (0.485, 0.456, 0.406),    # ImageNet
-        'CrisisMMD/humanitarian_orig': (0.485, 0.456, 0.406),   # ImageNet
+        'informative': (0.485, 0.456, 0.406),    # ImageNet
+        'humanitarian': (0.485, 0.456, 0.406),   # ImageNet
     }
 
     PRECOMPUTED_STDS = {
-        'CrisisMMD/informative_orig': (0.229, 0.224, 0.225),    # ImageNet
-        'CrisisMMD/humanitarian_orig': (0.229, 0.224, 0.225),   # ImageNet
+        'informative': (0.229, 0.224, 0.225),    # ImageNet
+        'humanitarian': (0.229, 0.224, 0.225),   # ImageNet
     }
 
     def __init__(self, config, build_algo):
