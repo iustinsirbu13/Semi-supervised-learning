@@ -6,7 +6,7 @@ num_train_iter: 10000
 num_eval_iter: 10000   
 num_log_iter: 50    
 optim: AdamW
-lr: 0.0005
+lr: 0.00001
 layer_decay: 0.5
 batch_size: 8
 eval_batch_size: 8
