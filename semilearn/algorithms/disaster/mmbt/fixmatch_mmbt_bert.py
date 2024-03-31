@@ -18,7 +18,6 @@ class FixMatchMMBTBert(FixMatchDisaster):
                    ulb_strong_sentence, ulb_strong_segment, ulb_strong_mask):
         
         lb_batch_size = lb_weak_image.shape[0]
-        lb_target = torch.squeeze(lb_target)
 
         images = torch.cat((lb_weak_image, ulb_weak_image, ulb_strong_image))
         sentences = torch.cat((lb_weak_sentence, ulb_weak_sentence, ulb_strong_sentence))
