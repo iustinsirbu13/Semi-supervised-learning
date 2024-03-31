@@ -77,7 +77,6 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
             ]
         )
         
-        # ToDo: clarify this???
         if self.model == 'mmbt_bert':
             # The first SEP is part of Image Token.
             segment = segment[1:]
@@ -96,7 +95,9 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
 
         strong_text = None
         if self.strong_text_tag is not None:
-            strong_text = random.choice(self.data[idx][self.strong_text_tag])
+            strong_text = self.data[idx][self.strong_text_tag]
+            if self.strong_text_tag != 'text':
+                strong_text = random.choice(strong_text)
 
         return image, target, weak_text, strong_text
 
