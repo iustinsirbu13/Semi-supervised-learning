@@ -17,10 +17,10 @@ task: humanitarian
 num_labels: 40
 crop_ratio: 0.875
 train_filename: train_eda.jsonl
-dev_filename: dev.jsonl
-test_filename: test.jsonl
+dev_filename: dev_eda.jsonl
+test_filename: test_eda.jsonl
 unlabeled_filename: unlabeled_eda.jsonl
-data_dir: C:\\Users\\Robert_Popovici\\Desktop\\licenta\\datasets\\humanitarian_orig
+data_dir: C:\\Users\\Robert_Popovici\\Desktop\\licenta\\datasets\\humanitarian
 img_dir: C:\\Users\\Robert_Popovici\\Desktop\\licenta\\datasets
 weak_text_tag: eda_02
 strong_text_tag: back_translate

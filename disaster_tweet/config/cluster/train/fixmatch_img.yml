@@ -19,11 +19,11 @@ dataset: disaster
 task: humanitarian
 num_labels: 0 
 crop_ratio: 0.875
-train_filename: train.jsonl
-dev_filename: dev.jsonl
-test_filename: test.jsonl
+train_filename: train_eda.jsonl
+dev_filename: dev_eda.jsonl
+test_filename: test_eda.jsonl
 unlabeled_filename: unlabeled_eda.jsonl
-data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian_orig
+data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian
 img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
 
 # algorithm specific configs
