@@ -16,3 +16,4 @@ transformers>=4.30.0
 wandb
 jsonlines==1.2.0
 pytorch-pretrained-bert
+nltk==3.4.5
