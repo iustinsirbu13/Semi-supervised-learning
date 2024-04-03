@@ -2,20 +2,20 @@ algorithm: fixmatch_multihead
 net: wrn_multihead_28_2
 
 # optimization configs
-epoch: 1
-num_train_iter: 10
-num_eval_iter: 5 
+epoch: 3
+num_train_iter: 30000
+num_eval_iter: 30000
 num_log_iter: 5
 optim: AdamW
 lr: 0.0005
 layer_decay: 0.5
-batch_size: 16
-eval_batch_size: 16
+batch_size: 2
+eval_batch_size: 2
 
 # dataset configs
 dataset: disaster
 task: humanitarian
-num_labels: 40
+num_labels: 400
 crop_ratio: 0.875
 train_filename: train.jsonl
 dev_filename: dev.jsonl

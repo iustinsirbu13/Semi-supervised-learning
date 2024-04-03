@@ -19,15 +19,6 @@ class FixMatchMultihead(FixMatchDisaster):
         logits_x_ulb_w, logits_x_ulb_s = head_logits[num_lb:].chunk(2)
         return logits_x_lb, logits_x_ulb_w, logits_x_ulb_s
     
-    # @overrides
-    def get_supervised_loss(self, lb_logits, lb_target):
-        lb_loss = 0
-        for head_id in range(self.num_heads):
-            head_lb_loss = super().get_supervised_loss(lb_logits[head_id], lb_target)
-            lb_loss += head_lb_loss
-
-        return lb_loss / lb_target.shape[0]
-    
 
     @staticmethod
     def get_majority_element(elements, ignore):
@@ -36,24 +27,18 @@ class FixMatchMultihead(FixMatchDisaster):
             if id in ignore:
                 continue
             
-            if count == 0:
-                candidate = element
+            candidate = element if count == 0 else candidate
+            count += 1 if candidate == element else -1
+            
 
-            if candidate == element:
-                count += 1
-            else:
-                count -= 1
+        count = 0
+        for id, element in enumerate(elements):
+            if id in ignore:
+                continue
 
-        count_equal = torch.sum(elements == candidate)
-        for id in ignore:
-            if elements[id] == candidate:
-                count_equal -= 1
-        
-        count_not_equal = elements.shape[0] - len(ignore) - count
+            count += 1 if candidate == element else -1
 
-        if count_equal > count_not_equal:
-            return candidate
-        return -1
+        return candidate if count > 0 else -1
 
 
     def get_head_unsupervised_loss(self, ulb_strong_logits, pseudo_labels, head_id):
@@ -62,20 +47,19 @@ class FixMatchMultihead(FixMatchDisaster):
 
         multihead_labels = torch.zeros(num_ulb, dtype=torch.int64).to(self.args.device)
         for i in range(num_ulb):
-            label = FixMatchMultihead.get_majority_element(pseudo_labels_transpose[i], {head_id})
-            multihead_labels[i] = label
+            multihead_labels[i] = FixMatchMultihead.get_majority_element(pseudo_labels_transpose[i], {head_id})
 
-        return super().get_unsupervised_loss(ulb_strong_logits[head_id], multihead_labels, multihead_labels != -1)
-    
+        return super(FixMatchMultihead, self).get_unsupervised_loss(ulb_strong_logits[head_id], multihead_labels, multihead_labels != -1)
+
+    # @overrides
+    def get_supervised_loss(self, lb_logits, lb_target):
+        head_losses = [super(FixMatchMultihead, self).get_supervised_loss(lb_logits[head_id], lb_target) for head_id in range(self.num_heads)]
+        return sum(head_losses) / self.num_heads
 
     # @overrides
     def get_unsupervised_loss(self, ulb_strong_logits, pseudo_labels):
-        ulb_loss  = 0
-        for head_id in range(self.num_heads):
-            head_ulb_loss = self.get_head_unsupervised_loss(ulb_strong_logits, pseudo_labels, head_id)
-            ulb_loss += head_ulb_loss
-
-        return ulb_loss / self.num_heads
+        head_losses = [self.get_head_unsupervised_loss(ulb_strong_logits, pseudo_labels, head_id) for head_id in range(self.num_heads)]
+        return sum(head_losses) / self.num_heads
 
     # @overrides
     def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s):
@@ -119,6 +103,9 @@ class FixMatchMultihead(FixMatchDisaster):
         if isinstance(x, dict):
             x = {k: v.to(self.args.device) for k, v in x.items()}
         else:
-            x = x.to(self.args.device)
+            x = x.to(self.args.device)  
+        
+        logits = self.model(x)[out_key]
 
-        return self.model(x)[out_key][0]
+        # Use all heads for prediction
+        return sum(logits) / self.num_heads

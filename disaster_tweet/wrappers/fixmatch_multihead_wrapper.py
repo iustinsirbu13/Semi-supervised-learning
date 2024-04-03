@@ -13,9 +13,12 @@ class FixMatchMultiheadWrapper(FixMatchClassicWrapper):
             config.num_heads = 3
         
         if not has_argument(config, 'img_size'):
-            config.img_size = 224
+            config.img_size = 32
 
         super().__init__(config, build_algo)
 
         # Multihead cotraining requires hard pseudo-labels
         assert config.hard_label == True
+        
+        # wrn requires 32x32 images
+        assert config.img_size == 32

@@ -4,7 +4,7 @@ from disaster_tweet.wrappers.fixmatch_mmbt_bert_wrapper import FixMatchMMBTBertW
 
 class FixMatchMultiheadMMBTBertWrapper(FixMatchMMBTBertWrapper):
     def __init__(self, config, build_algo=True):
-
+        
         if not has_argument(config, 'num_heads'):
             config.num_heads = 3
 
