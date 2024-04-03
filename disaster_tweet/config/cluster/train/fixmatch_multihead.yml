@@ -3,14 +3,14 @@ net: wrn_multihead_28_2
 
 # optimization configs
 epoch: 20
-num_train_iter: 10000
-num_eval_iter: 10000 
+num_train_iter: 1000000
+num_eval_iter: 1000000
 num_log_iter: 50
 optim: AdamW
 lr: 0.0005
 layer_decay: 0.5
-batch_size: 64
-eval_batch_size: 64
+batch_size: 16
+eval_batch_size: 16
 
 # dataset configs
 dataset: disaster

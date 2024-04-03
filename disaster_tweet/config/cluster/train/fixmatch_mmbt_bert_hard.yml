@@ -2,8 +2,8 @@ algorithm: fixmatch_mmbt_bert
 
 # optimization configs
 epoch: 20
-num_train_iter: 10000 
-num_eval_iter: 10000   
+num_train_iter: 1000000 
+num_eval_iter: 1000000
 num_log_iter: 50    
 optim: AdamW
 lr: 0.00001
@@ -23,8 +23,8 @@ test_filename: test.jsonl
 unlabeled_filename: unlabeled_eda.jsonl
 data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian_orig
 img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
-weak_text_tag: eda_02
-strong_text_tag: back_translate
+weak_text_tag: eda_01 
+strong_text_tag: eda_02 
 
 # algorithm specific configs
 hard_label: True

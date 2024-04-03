@@ -5,8 +5,8 @@ pretrain_path: https://github.com/microsoft/Semi-supervised-learning/releases/do
 
 # optimization configs
 epoch: 20  
-num_train_iter: 10000
-num_eval_iter: 10000   
+num_train_iter: 1000000
+num_eval_iter: 1000000   
 num_log_iter: 50    
 optim: AdamW
 lr: 0.0005
