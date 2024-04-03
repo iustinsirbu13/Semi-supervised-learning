@@ -54,7 +54,7 @@ class FixMatchMultihead(FixMatchDisaster):
     # @overrides
     def get_supervised_loss(self, lb_logits, lb_target):
         head_losses = [super(FixMatchMultihead, self).get_supervised_loss(lb_logits[head_id], lb_target) for head_id in range(self.num_heads)]
-        return sum(head_losses) / self.num_heads
+        return sum(head_losses)
 
     # @overrides
     def get_unsupervised_loss(self, ulb_strong_logits, pseudo_labels):
