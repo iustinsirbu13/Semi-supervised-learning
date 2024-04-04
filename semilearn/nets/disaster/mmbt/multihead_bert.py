@@ -20,6 +20,13 @@ class MultiheadMultimodelBertClf(nn.Module):
     def modules(self):
         from itertools import chain
         return chain(super().modules(), self.clf)
+    
+    # @overrides
+    def cuda(self, device=None):
+        obj = super().cuda(device)
+        for id in range(len(self.clf)):
+            obj.clf[id] = self.clf[id].cuda(device)
+        return obj
 
 def multihead_mmbt_bert(args):
     model = MultiheadMultimodelBertClf(args)
