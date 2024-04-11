@@ -15,6 +15,9 @@ class FixMatchMultiheadWrapper(FixMatchClassicWrapper):
         if not has_argument(config, 'img_size'):
             config.img_size = 32
 
+        if not has_argument(config, 'use_head_cutoff'):
+            config.use_head_cutoff = False
+
         super().__init__(config, build_algo)
 
         # Multihead cotraining requires hard pseudo-labels

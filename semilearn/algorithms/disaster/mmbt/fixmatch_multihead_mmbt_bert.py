@@ -46,9 +46,10 @@ class FixMatchMultiheadMMBTBert(FixMatchMultihead):
 
         # Pseudo labels
         pseudo_labels = torch.stack([self.get_pseudo_labels(logits_x_ulb_w[head_id])[0] for head_id in range(self.num_heads)])
+        threshold_masks = torch.stack([self.get_pseudo_labels(logits_x_ulb_w[head_id])[1] for head_id in range(self.num_heads)])
 
         # Unsupervised loss
-        ulb_loss = self.get_unsupervised_loss(logits_x_ulb_s, pseudo_labels)
+        ulb_loss = self.get_unsupervised_loss(logits_x_ulb_s, pseudo_labels, threshold_masks)
 
         # Total loss
         loss = self.get_loss(lb_loss, ulb_loss)

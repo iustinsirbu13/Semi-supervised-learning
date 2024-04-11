@@ -8,6 +8,9 @@ class FixMatchMultiheadMMBTBertWrapper(FixMatchMMBTBertWrapper):
         if not has_argument(config, 'num_heads'):
             config.num_heads = 3
 
+        if not has_argument(config, 'use_head_cutoff'):
+            config.use_head_cutoff = False
+
         super().__init__(config, build_algo)
 
         # Multihead cotraining requires hard pseudo-labels
