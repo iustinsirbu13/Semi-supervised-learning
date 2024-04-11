@@ -1,33 +1,31 @@
-algorithm: fixmatch_mmbt_bert
+algorithm: fixmatch_multihead
+net: wrn_multihead_28_2
 
 # optimization configs
 epoch: 20
-num_train_iter: 1000000 
-num_eval_iter: 1000000   
-num_log_iter: 50    
+num_train_iter: 1000000
+num_eval_iter: 1000000
+num_log_iter: 50
 optim: AdamW
-lr: 0.00001
+lr: 0.0005
 layer_decay: 0.5
-batch_size: 8
-eval_batch_size: 8
+batch_size: 16
+eval_batch_size: 16
 
 # dataset configs
 dataset: disaster
 task: humanitarian
 num_labels: 0
 crop_ratio: 0.875
-img_size: 224
 train_filename: train_eda.jsonl
 dev_filename: dev_eda.jsonl
 test_filename: test_eda.jsonl
 unlabeled_filename: unlabeled_eda.jsonl
 data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian
 img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
-weak_text_tag: eda_01 
-strong_text_tag: eda_02 
 
 # algorithm specific configs
-hard_label: False 
+hard_label: True
 uratio: 3
 ulb_loss_ratio: 1.0
 
@@ -39,7 +37,7 @@ distributed: False
 
 # test configs
 resume: True
-save_dir: ./saved_models
-save_name: fixmatch-mmbt-bert-soft-eval
-load_path: ./saved_models/fixmatch-mmbt-bert-soft/model_best.pth
+save_dir: ./saved_models/eval
+save_name: fixmatch-multihead
+load_path: ./saved_models/train/fixmatch-multihead/model_best.pth
 eval_only: True

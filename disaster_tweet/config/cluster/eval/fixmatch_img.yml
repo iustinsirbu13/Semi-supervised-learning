@@ -1,30 +1,30 @@
-algorithm: fixmatch_multihead_mmbt_bert
+algorithm: fixmatch
+net: vit_tiny_patch2_32
+use_pretrain: True
+pretrain_path: https://github.com/microsoft/Semi-supervised-learning/releases/download/v.0.0.0/vit_tiny_patch2_32_mlp_im_1k_32.pth
 
 # optimization configs
-epoch: 20
-num_train_iter: 1000000 
-num_eval_iter: 1000000
+epoch: 20  
+num_train_iter: 1000000
+num_eval_iter: 1000000   
 num_log_iter: 50    
 optim: AdamW
-lr: 0.00001
+lr: 0.0005
 layer_decay: 0.5
-batch_size: 8
-eval_batch_size: 8
+batch_size: 64
+eval_batch_size: 64
 
 # dataset configs
 dataset: disaster
 task: humanitarian
 num_labels: 0
 crop_ratio: 0.875
-img_size: 224
 train_filename: train_eda.jsonl
 dev_filename: dev_eda.jsonl
 test_filename: test_eda.jsonl
 unlabeled_filename: unlabeled_eda.jsonl
 data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian
 img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
-weak_text_tag: eda_01 
-strong_text_tag: eda_02 
 
 # algorithm specific configs
 hard_label: True
@@ -38,6 +38,8 @@ num_workers: 2
 distributed: False
 
 # test configs
-save_dir: ./saved_models
-save_name: fixmatch-multihead-mmbt-bert-hard
-overwrite: False
+resume: True
+save_dir: ./saved_models/eval
+save_name: fixmatch-img
+load_path: ./saved_models/train/fixmatch-img/model_best.pth
+eval_only: True

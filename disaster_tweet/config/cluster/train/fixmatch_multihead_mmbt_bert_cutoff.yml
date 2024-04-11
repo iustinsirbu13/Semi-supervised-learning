@@ -1,4 +1,4 @@
-algorithm: fixmatch_mmbt_bert
+algorithm: fixmatch_multihead_mmbt_bert
 
 # optimization configs
 epoch: 20
@@ -30,6 +30,7 @@ strong_text_tag: eda_02
 hard_label: True
 uratio: 3
 ulb_loss_ratio: 1.0
+use_head_cutoff: True
 
 # device configs
 gpu: 0
@@ -39,5 +40,5 @@ distributed: False
 
 # test configs
 save_dir: ./saved_models/train
-save_name: fixmatch-mmbt-bert-hard
+save_name: fixmatch-multihead-mmbt-bert-cutoff
 overwrite: False

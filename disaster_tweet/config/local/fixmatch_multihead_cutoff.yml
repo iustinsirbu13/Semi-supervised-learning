@@ -2,40 +2,36 @@ algorithm: fixmatch_multihead
 net: wrn_multihead_28_2
 
 # optimization configs
-epoch: 20
-num_train_iter: 1000000
-num_eval_iter: 1000000
-num_log_iter: 50
+epoch: 3
+num_train_iter: 30000
+num_eval_iter: 30000
+num_log_iter: 5
 optim: AdamW
 lr: 0.0005
 layer_decay: 0.5
-batch_size: 16
-eval_batch_size: 16
+batch_size: 2
+eval_batch_size: 2
 
 # dataset configs
 dataset: disaster
 task: humanitarian
-num_labels: 0
+num_labels: 400
 crop_ratio: 0.875
 train_filename: train_eda.jsonl
 dev_filename: dev_eda.jsonl
 test_filename: test_eda.jsonl
 unlabeled_filename: unlabeled_eda.jsonl
-data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian
-img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
+data_dir: C:\\Users\\Robert_Popovici\\Desktop\\licenta\\datasets\\humanitarian
+img_dir: C:\\Users\\Robert_Popovici\\Desktop\\licenta\\datasets
 
 # algorithm specific configs
 hard_label: True
-uratio: 3
+uratio: 2
 ulb_loss_ratio: 1.0
+use_head_cutoff: True
 
 # device configs
-gpu: 0
+gpu: None
 world_size: 1
 num_workers: 2
 distributed: False
-
-# test configs
-save_dir: ./saved_models/train
-save_name: fixmatch-multihead
-overwrite: False
