@@ -10,8 +10,8 @@ num_log_iter: 50
 optim: AdamW
 lr: 0.0005
 layer_decay: 0.5
-batch_size: 64
-eval_batch_size: 64
+batch_size: 8
+eval_batch_size: 8
 
 # dataset configs
 dataset: disaster
