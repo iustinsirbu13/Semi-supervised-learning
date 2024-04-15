@@ -1,7 +1,7 @@
 algorithm: fixmatch
-net: vit_tiny_patch2_32
+net: vit_base_patch16_224
 use_pretrain: True
-pretrain_path: https://github.com/microsoft/Semi-supervised-learning/releases/download/v.0.0.0/vit_tiny_patch2_32_mlp_im_1k_32.pth
+pretrain_path: https://github.com/microsoft/Semi-supervised-learning/releases/download/v.0.0.0/vit_base_patch16_224_mlp_in_1k_224.pth
 
 # optimization configs
 epoch: 20  
@@ -17,7 +17,7 @@ eval_batch_size: 64
 # dataset configs
 dataset: disaster
 task: humanitarian
-num_labels: 0
+num_labels: 0 
 crop_ratio: 0.875
 train_filename: train_eda.jsonl
 dev_filename: dev_eda.jsonl
@@ -38,8 +38,6 @@ num_workers: 2
 distributed: False
 
 # test configs
-resume: True
-save_dir: ./saved_models/fixmatch/eval
-save_name: fixmatch
-load_path: ./saved_models/fixmatch/train/fixmatch/model_best.pth
-eval_only: True
+save_dir: ./saved_models/fixmatch/train
+save_name: fixmatch-vit-224-pretrained
+overwrite: False
