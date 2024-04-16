@@ -1,7 +1,8 @@
 import torch
 import numpy as np
+from semilearn.core.hooks import Hook
 
-class FlexMatchHook:
+class FlexMatchHook(Hook):
     def __init__(self, args):
         self.p_cutoff = args.p_cutoff
         self.num_classes = args.num_classes
@@ -16,7 +17,7 @@ class FlexMatchHook:
         self.thresholds.fill(self.p_cutoff)
 
     
-    def update(self, ulb_weak_logits):
+    def update(self, algorithm, ulb_weak_logits):
         # max probability for each logit tensor
         # index with highest probability for each logit tensor
         max_probs, pseudo_labels = torch.max(ulb_weak_logits, dim=-1)
@@ -36,7 +37,7 @@ class FlexMatchHook:
         return threshold_mask
 
 
-    def after_train_epoch(self):
+    def after_train_epoch(self, algorithm):
         max_threshold_count = np.max(self.threshold_count)
         sum_threshold_count = np.sum(self.threshold_count)
         

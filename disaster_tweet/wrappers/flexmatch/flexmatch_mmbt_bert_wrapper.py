@@ -74,5 +74,5 @@ class FlexMatchMMBTBertWrapper(FlexMatchMMBTBaseWrapper):
 
 
     def validate_algo(self, config):
-        assert config.algorithm == ALGO_WRAPPERS.FIXMATCH_MMBT_BERT
+        assert config.algorithm == ALGO_WRAPPERS.FLEXMATCH_MMBT_BERT
         config.net = 'mmbt_bert'

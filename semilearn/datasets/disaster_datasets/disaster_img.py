@@ -93,7 +93,7 @@ class DisasterDatasetImage(Dataset):
             return {'x_lb': weak_image, 'y_lb': target}
         else:
             strong_image = self.get_strong_image(image)
-            return {'x_ulb_w': weak_image, 'x_ulb_s': strong_image}
+            return {'x_ulb_w': weak_image, 'x_ulb_s': strong_image, 'idx_ulb': idx}
 
 
     def __len__(self):
