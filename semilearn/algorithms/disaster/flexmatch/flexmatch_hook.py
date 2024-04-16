@@ -50,5 +50,8 @@ class FlexMatchHook(Hook):
                 # use formula from paper (https://arxiv.org/pdf/2110.08263.pdf)
                 self.thresholds[label] = self.p_cutoff * (count / max(max_threshold_count, self.ulb_size - sum_threshold_count))
 
+        algorithm.print_fn(f'Class threshold counts = {self.threshold_count}')
+        algorithm.print_fn(f'Class thresholds = {self.thresholds}')
+
         # prepare for new epoch => reset class counts to 0
         self.threshold_count.fill(0)

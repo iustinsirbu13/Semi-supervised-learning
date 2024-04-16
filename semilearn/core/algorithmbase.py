@@ -561,8 +561,6 @@ class AlgorithmBase:
         """
 
         if hook_name is not None:
-            print(args)
-            print(kwargs)
             return getattr(self.hooks_dict[hook_name], fn_name)(self, *args, **kwargs)
 
         for hook in self.hooks_dict.values():
