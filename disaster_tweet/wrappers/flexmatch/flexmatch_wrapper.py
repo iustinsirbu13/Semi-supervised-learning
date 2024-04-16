@@ -2,7 +2,7 @@ from disaster_tweet.wrappers.build import ALGO_WRAPPERS
 from disaster_tweet.wrappers.flexmatch.flexmatch_base_wrapper import FlexMatchBaseWrapper
 
 
-class FixMatchWrapper(FlexMatchBaseWrapper):
+class FlexMatchWrapper(FlexMatchBaseWrapper):
 
     def __init__(self, config, build_algo=True):
         assert config.algorithm == ALGO_WRAPPERS.FLEXMATCH
