@@ -6,7 +6,7 @@ class FlexMatchHook(Hook):
     def __init__(self, args):
         self.p_cutoff = args.p_cutoff
         self.num_classes = args.num_classes
-        self.ulb_dataset_size = len(args.wrapper.unlabeled_dataset)
+        self.ulb_size = len(args.wrapper.unlabeled_dataset)
         self.args = args
 
         # class counts should be 0 at the beginning of each epoch
