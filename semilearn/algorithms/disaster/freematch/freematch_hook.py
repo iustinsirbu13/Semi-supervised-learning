@@ -29,7 +29,12 @@ class FreeMatchHook(Hook):
         Self-adaptive threshold (https://arxiv.org/pdf/2205.07246.pdf)
         '''
         max_local_threshold = np.max(local_thresholds)
-        return global_threshold * (local_thresholds / max_local_threshold)
+
+        adaptive_threshold = np.zeros(self.num_classes)
+        for label in range(self.num_classes):
+            adaptive_threshold[label] = global_threshold * (local_thresholds[label] / max_local_threshold)
+        
+        return adaptive_threshold
 
     
     def update(self, algorithm, ulb_weak_logits):
