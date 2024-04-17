@@ -49,7 +49,8 @@ class FreeMatchHook(Hook):
             self.new_global_threshold += (1.0 / self.ulb_size) * max_probs[i]
             
             # update the local thresholds for the next epoch
-            self.new_local_thresholds += (1.0 / self.ulb_size) * ulb_weak_logits[i]
+            for label in range(self.num_classes):
+                self.new_local_thresholds[label] += (1.0 / self.ulb_size) * ulb_weak_logits[i][label]
 
         return threshold_mask
 
