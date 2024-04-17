@@ -63,6 +63,10 @@ class FreeMatchHook(Hook):
         # compute the new class thresholds
         self.thresholds = self.get_class_threholds(self.global_threshold, self.local_thresholds)
 
+        algorithm.print_fn(f'Global threshold = {self.global_threshold}')
+        algorithm.print_fn(f'Local class thresholds = {self.local_thresholds}')
+        algorithm.print_fn(f'Self-adaptive class thresholds = {self.thresholds}')
+
         # reset global/local thresholds for the next epoch
         self.new_global_threshold = 0
         self.new_local_thresholds = np.zeros(self.num_classes)
