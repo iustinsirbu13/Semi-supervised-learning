@@ -50,6 +50,20 @@ def build_wrapper(dataset, algorithm, config, build_algo=True):
     elif algorithm == ALGO_WRAPPERS.FLEXMATCH_MMBT_BERT:
         from disaster_tweet.wrappers.flexmatch.flexmatch_mmbt_bert_wrapper import FlexMatchMMBTBertWrapper
         return FlexMatchMMBTBertWrapper(config, build_algo)
+    
+
+    ######################
+    ##  Freematch Start ##
+    ######################
+
+    elif algorithm == ALGO_WRAPPERS.FREEMATCH:
+        from disaster_tweet.wrappers.freematch.freematch_wrapper import FreeMatchWrapper
+        return FreeMatchWrapper(config, build_algo)
+    
+    elif algorithm == ALGO_WRAPPERS.FREEMATCH_MMBT_BERT:
+        from disaster_tweet.wrappers.freematch.freematch_mmbt_bert_wrapper import FreeMatchMMBTBertWrapper
+        return FreeMatchMMBTBertWrapper(config, build_algo)
+
 
     
     raise Exception(f'Unknown disaster algorithm: {algorithm}')

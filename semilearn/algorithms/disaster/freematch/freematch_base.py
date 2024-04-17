@@ -1,10 +1,10 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
-from semilearn.algorithms.disaster.flexmatch.flexmatch_hook import FlexMatchHook
+from semilearn.algorithms.disaster.freematch.freematch_hook import FreeMatchHook
 from semilearn.core.algorithmbase import AlgorithmBase
 
-class FlexMatchBase(AlgorithmBase):
+class FreeMatchBase(AlgorithmBase):
     def __init__(self, args, net_builder, tb_log=None, logger=None):
         super().__init__(args, net_builder, tb_log=tb_log, logger=logger)
 
@@ -28,19 +28,21 @@ class FlexMatchBase(AlgorithmBase):
     # @overrides
     def set_hooks(self):
         super().set_hooks()
-        self.register_hook(FlexMatchHook(self.args), 'FlexMatchHook')
+        self.register_hook(FreeMatchHook(self.args), 'FreeMatchHook')
 
     # @overrides
     def get_save_dict(self):
         save_dict = super().get_save_dict()
         # additional saving arguments
-        save_dict['thresholds'] = self.hooks_dict['FlexMatchHook'].thresholds
+        save_dict['global_threshold'] = self.hooks_dict['FreeMatchHook'].global_threshold
+        save_dict['local_thresholds'] = self.hooks_dict['FreeMatchHook'].local_thresholds
         return save_dict
 
     # @overrides
     def load_model(self, load_path):
         checkpoint = super().load_model(load_path)
-        self.hooks_dict['FlexMatchHook'].thresholds = checkpoint['thresholds']
+        self.hooks_dict['FreeMatchHook'].global_threshold = checkpoint['global_threshold']
+        self.hooks_dict['FreeMatchHook'].local_thresholds = checkpoint['local_thresholds']
         self.print_fn("additional parameter loaded")
         return checkpoint
 
@@ -55,7 +57,7 @@ class FlexMatchBase(AlgorithmBase):
         # index with highest probability for each logit tensor
         max_probs, pseudo_labels = torch.max(ulb_weak_logits_norm, dim=-1)
 
-        threshold_mask = self.call_hook('update', 'FlexMatchHook', ulb_weak_logits=ulb_weak_logits_norm)
+        threshold_mask = self.call_hook('update', 'FreeMatchHook', ulb_weak_logits=ulb_weak_logits_norm)
 
         return pseudo_labels, threshold_mask
 
