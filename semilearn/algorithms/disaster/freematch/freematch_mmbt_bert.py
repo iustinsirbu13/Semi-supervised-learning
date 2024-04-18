@@ -43,12 +43,15 @@ class FreeMatchMMBTBert(FreeMatchBase):
         # Unsupervised loss
         ulb_loss = self.get_unsupervised_loss(ulb_strong_logits, pseudo_labels, threshold_mask)
 
+        # Fairness loss
+        fairness_loss = self.get_self_adaptive_fairness(ulb_strong_logits, threshold_mask)
+
         # Total loss
-        loss = self.get_loss(lb_loss, ulb_loss)
+        loss = self.get_loss(lb_loss, ulb_loss, fairness_loss=fairness_loss)
 
         out_dict = self.process_out_dict(loss=loss)
         log_dict = self.process_log_dict(sup_loss=lb_loss.item(), 
-                                         unsup_loss=ulb_loss.item(), 
+                                         unsup_loss=ulb_loss.item(),
                                          total_loss=loss.item(), 
                                          util_ratio=threshold_mask.float().mean().item())
         

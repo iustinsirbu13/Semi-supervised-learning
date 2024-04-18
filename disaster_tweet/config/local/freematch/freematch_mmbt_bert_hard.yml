@@ -1,7 +1,7 @@
 algorithm: freematch_mmbt_bert
 
 # optimization configs
-epoch: 5
+epoch: 1
 num_train_iter: 1000 
 num_eval_iter: 1000   
 num_log_iter: 10    
@@ -14,7 +14,7 @@ eval_batch_size: 2
 # dataset configs
 dataset: disaster
 task: humanitarian
-num_labels: 100
+num_labels: 40
 crop_ratio: 0.875
 train_filename: train_eda.jsonl
 dev_filename: dev_eda.jsonl
@@ -29,6 +29,7 @@ strong_text_tag: back_translate
 hard_label: True
 uratio: 2
 ulb_loss_ratio: 1.0
+use_self_adaptive_fairnes: True
 
 # device configs
 gpu: None

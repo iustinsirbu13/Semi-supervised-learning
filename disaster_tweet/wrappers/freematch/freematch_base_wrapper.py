@@ -12,6 +12,10 @@ class FreeMatchBaseWrapper(SSLDisasterWrapper):
         if not has_argument(config, 'freematch_ema_decay'):
             config.freematch_ema_decay = 0.999
 
+        # Default fairness loss ratio from paper (https://arxiv.org/pdf/2205.07246.pdf)
+        if not has_argument(config, 'fairness_loss_ratio'):
+            config.fairness_loss_ratio = 0.05
+
         super().__init__(config, build_algo)
 
     # @overrides

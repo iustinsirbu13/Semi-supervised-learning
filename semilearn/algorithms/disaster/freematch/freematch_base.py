@@ -36,6 +36,7 @@ class FreeMatchBase(AlgorithmBase):
         # additional saving arguments
         save_dict['global_threshold'] = self.hooks_dict['FreeMatchHook'].global_threshold
         save_dict['local_thresholds'] = self.hooks_dict['FreeMatchHook'].local_thresholds
+        save_dict['hist'] = self.hooks_dict['FreeMatchHook'].hist
         return save_dict
 
     # @overrides
@@ -43,6 +44,7 @@ class FreeMatchBase(AlgorithmBase):
         checkpoint = super().load_model(load_path)
         self.hooks_dict['FreeMatchHook'].global_threshold = checkpoint['global_threshold']
         self.hooks_dict['FreeMatchHook'].local_thresholds = checkpoint['local_thresholds']
+        self.hooks_dict['FreeMatchHook'].hist = checkpoint['hist']
         self.print_fn("additional parameter loaded")
         return checkpoint
 
@@ -69,6 +71,34 @@ class FreeMatchBase(AlgorithmBase):
         pseudo_labels = pseudo_labels[threshold_mask == 1]
 
         return F.cross_entropy(ulb_strong_logits, pseudo_labels)
+    
+    def sum_norm(self, x):
+        return x / torch.sum(x)
+    
+    def get_self_adaptive_fairness(self, ulb_strong_logits, threshold_mask):
+        if not self.args.use_self_adaptive_fairness:
+            return None
+        
+        # self adaptive fairness from paper (https://arxiv.org/pdf/2205.07246.pdf)
+        hook = self.hooks_dict['FreeMatchHook']
 
-    def get_loss(self, lb_loss, ulb_loss):
-        return lb_loss + self.lambda_u * ulb_loss
+        # apprently the paper calculates these values for each iteration, not epoch
+        # as a workaround we will use previous values (p[t - 1] and h[t - 1])
+        pt = hook.local_thresholds
+        ht = hook.hist
+
+        ulb_strong_logits = ulb_strong_logits[threshold_mask == 1]
+        p = torch.sum(ulb_strong_logits, dim=0)
+
+        max_probs, strong_labels = torch.max(ulb_strong_logits, dim = -1)
+        h = torch.bincount(strong_labels)
+        h = torch.cat((h, torch.zeros(self.num_classes - h.shape[0]).to(self.args.device)))
+
+        return -F.cross_entropy(self.sum_norm(pt / ht), self.sum_norm(p / h))
+
+
+    def get_loss(self, lb_loss, ulb_loss, fairness_loss=None):
+        loss = lb_loss + self.lambda_u * ulb_loss
+        if fairness_loss is not None:
+            loss += self.lambda_f * fairness_loss
+        return loss
