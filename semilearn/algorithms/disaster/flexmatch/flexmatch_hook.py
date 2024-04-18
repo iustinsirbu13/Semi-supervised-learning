@@ -21,8 +21,9 @@ class FlexMatchHook(Hook):
         max_probs, pseudo_labels = torch.max(ulb_weak_logits, dim=-1)
 
         # label exceeds global threshold => increase count for the corresponding class
-        self.threshold_count = torch.bincount(pseudo_labels[max_probs >= self.p_cutoff])
-        self.threshold_count = torch.cat((self.threshold_count, torch.zeros(self.num_classes - self.threshold_count.shape[0]).to(self.args.device)))
+        curr_threshold_count = torch.bincount(pseudo_labels[max_probs >= self.p_cutoff])
+        curr_threshold_count = torch.cat((curr_threshold_count, torch.zeros(self.num_classes - curr_threshold_count.shape[0]).to(self.args.device)))
+        self.threshold_count += curr_threshold_count
 
         threshold_mask = torch.zeros(pseudo_labels.shape[0], dtype=torch.bool).to(self.args.device)
         for i in range(pseudo_labels.shape[0]):
