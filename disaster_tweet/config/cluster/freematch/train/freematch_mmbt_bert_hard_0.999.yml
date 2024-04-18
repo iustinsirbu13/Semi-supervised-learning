@@ -39,5 +39,5 @@ distributed: False
 
 # test configs
 save_dir: ./saved_models/freematch/train
-save_name: freematch-mmbt-bert-hard
+save_name: freematch-mmbt-bert-hard-0.999
 overwrite: False
