@@ -20,7 +20,7 @@ class FreeMatchHook(Hook):
         self.thresholds = self.get_class_threholds(self.global_threshold, self.local_thresholds)
 
         # global and local thresholds for next epoch
-        self.new_global_threshold = 0
+        self.new_global_threshold = 0.0
         self.new_local_thresholds = torch.zeros(self.num_classes).to(self.args.device)
 
         # initial histogram value is 1 / C (we use probability distribution instead of count)
@@ -81,7 +81,7 @@ class FreeMatchHook(Hook):
         algorithm.print_fn(f'Histogram = {self.hist}')
 
         # reset global/local thresholds for the next epoch
-        self.new_global_threshold = torch.tensor(0).to(self.args.device)
+        self.new_global_threshold = 0.0
         self.new_local_thresholds = torch.zeros(self.num_classes).to(self.args.device)
 
         # reset histogram
