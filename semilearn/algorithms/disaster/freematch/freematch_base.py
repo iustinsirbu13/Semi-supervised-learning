@@ -7,6 +7,11 @@ from semilearn.core.algorithmbase import AlgorithmBase
 class FreeMatchBase(AlgorithmBase):
     def __init__(self, args, net_builder, tb_log=None, logger=None):
         super().__init__(args, net_builder, tb_log=tb_log, logger=logger)
+        self.init(args.p_cutoff, args.fairness_loss_ratio)
+
+    def init(self, p_cutoff, lambda_f):
+        self.p_cutoff = p_cutoff
+        self.lambda_f = lambda_f
 
     # @overrides
     def set_model(self):
