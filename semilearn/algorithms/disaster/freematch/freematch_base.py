@@ -93,7 +93,7 @@ class FreeMatchBase(AlgorithmBase):
         ht = hook.hist
 
         ulb_strong_logits = ulb_strong_logits[threshold_mask == 1]
-        p = torch.sum(ulb_strong_logits, dim=0)
+        p = torch.sum(ulb_strong_logits.detach(), dim=0)
 
         max_probs, strong_labels = torch.max(ulb_strong_logits, dim = -1)
         h = torch.bincount(strong_labels)
