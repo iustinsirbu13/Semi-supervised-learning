@@ -30,7 +30,8 @@ strong_text_tag: eda_02
 hard_label: True
 uratio: 3
 ulb_loss_ratio: 1.0
-freematch_ema_decay: 0.99
+ema_p: 0.99
+ent_loss_ratio: 0
 
 # device configs
 gpu: 0

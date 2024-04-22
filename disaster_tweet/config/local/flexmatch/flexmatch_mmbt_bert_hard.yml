@@ -4,7 +4,7 @@ algorithm: flexmatch_mmbt_bert
 epoch: 1
 num_train_iter: 1000 
 num_eval_iter: 1000   
-num_log_iter: 10    
+num_log_iter: 1    
 optim: AdamW
 lr: 0.00001
 layer_decay: 0.5

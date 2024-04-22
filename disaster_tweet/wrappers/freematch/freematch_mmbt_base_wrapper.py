@@ -7,16 +7,13 @@ class FreeMatchMMBTBaseWrapper(SSLDisasterWrapper):
         assert has_argument(config, 'weak_text_tag')
         assert has_argument(config, 'strong_text_tag')
 
-        if not has_argument(config, 'use_self_adaptive_fairness'):
-            config.use_self_adaptive_fairness = False
-
         # Best value from paper (https://arxiv.org/pdf/2205.07246.pdf)
-        if not has_argument(config, 'freematch_ema_decay'):
-            config.freematch_ema_decay = 0.999
+        if not has_argument(config, 'ema_p'):
+            config.ema_p = 0.999
 
         # Default fairness loss ratio from paper (https://arxiv.org/pdf/2205.07246.pdf)
-        if not has_argument(config, 'fairness_loss_ratio'):
-            config.fairness_loss_ratio = 0.05
+        if not has_argument(config, 'ent_loss_ratio'):
+            config.ent_loss_ratio = 0.01
 
         self.tokenizer = self.get_tokenizer(config).tokenize
         self.vocab = self.get_vocab(config)
