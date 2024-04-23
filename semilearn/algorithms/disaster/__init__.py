@@ -8,3 +8,5 @@ from .fixmatch.fixmatch_multihead import FixMatchMultihead
 from .flexmatch.flexmatch_mmbt_bert import FlexMatchMMBTBert
 
 from .freematch.freematch_mmbt_bert import FreeMatchMMBTBert
+
+from .marginmatch.marginmatch_mmbt_bert import MarginMatchMMBTBert

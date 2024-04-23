@@ -64,7 +64,17 @@ def build_wrapper(dataset, algorithm, config, build_algo=True):
         from disaster_tweet.wrappers.freematch.freematch_mmbt_bert_wrapper import FreeMatchMMBTBertWrapper
         return FreeMatchMMBTBertWrapper(config, build_algo)
 
+    ########################
+    ##  Marginmatch Start ##
+    ########################
 
+    elif algorithm == ALGO_WRAPPERS.MARGINMATCH:
+        from disaster_tweet.wrappers.marginmatch.marginmatch_wrapper import MarginMatchWrapper
+        return MarginMatchWrapper(config, build_algo)
+    
+    elif algorithm == ALGO_WRAPPERS.MARGINMATCH_MMBT_BERT:
+        from disaster_tweet.wrappers.marginmatch.marginmatch_mmbt_bert_wrapper import MarginMatchMMBTBertWrapper
+        return MarginMatchMMBTBertWrapper(config, build_algo)
     
     raise Exception(f'Unknown disaster algorithm: {algorithm}')
     
