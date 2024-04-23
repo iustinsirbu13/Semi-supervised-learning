@@ -63,6 +63,7 @@ class FreeMatchThresholdingHook(MaskingHook):
         max_probs, max_idx = probs_x_ulb.max(dim=-1)
         mod = self.p_model / torch.max(self.p_model, dim=-1)[0]
         mask = max_probs.ge(self.time_p * mod[max_idx]).to(max_probs.dtype)
+
         return mask
 
 

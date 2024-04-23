@@ -150,4 +150,6 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
             items['ulb_strong_segment'] = strong_text_tensors[1]
             items['ulb_strong_mask'] = strong_text_tensors[2]
 
+            items['idx_ulb'] = idx
+
         return items

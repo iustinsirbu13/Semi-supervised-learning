@@ -1,0 +1,43 @@
+algorithm: flexmatch_mmbt_bert
+
+# optimization configs
+epoch: 20
+num_train_iter: 1000000 
+num_eval_iter: 1000000
+num_log_iter: 50    
+optim: AdamW
+lr: 0.00001
+layer_decay: 0.5
+batch_size: 8
+eval_batch_size: 8
+
+# dataset configs
+dataset: disaster
+task: humanitarian
+num_labels: 0
+crop_ratio: 0.875
+img_size: 224
+train_filename: train_eda.jsonl
+dev_filename: dev_eda.jsonl
+test_filename: test_eda.jsonl
+unlabeled_filename: unlabeled_eda.jsonl
+data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/humanitarian
+img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
+weak_text_tag: eda_01 
+strong_text_tag: eda_02 
+
+# algorithm specific configs
+hard_label: True
+uratio: 3
+ulb_loss_ratio: 1.0
+
+# device configs
+gpu: 0
+world_size: 1
+num_workers: 2
+distributed: False
+
+# test configs
+save_dir: ./saved_models/flexmatch/train
+save_name: flexmatch-mmbt-bert-hard
+overwrite: False
