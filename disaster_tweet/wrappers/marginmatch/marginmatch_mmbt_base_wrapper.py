@@ -18,6 +18,8 @@ class MarginMatchMMBTBaseWrapper(SSLDisasterWrapper):
         if config.threshold_algo == 'freematch':
             if not has_argument(config, 'ema_p'):
                 config.ema_p = 0.999
+        else:
+            assert has_argument(config, 'thresh_warmup')
 
         # Value from paper (https://arxiv.org/pdf/2308.09037.pdf)
         if not has_argument(config, 'smoothness'):

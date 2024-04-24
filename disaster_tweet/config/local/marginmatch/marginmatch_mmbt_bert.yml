@@ -9,7 +9,7 @@ optim: AdamW
 lr: 0.00001
 layer_decay: 0.5
 batch_size: 2
-eval_batch_size: 4
+eval_batch_size: 2
 
 # dataset configs
 dataset: disaster
@@ -29,6 +29,7 @@ strong_text_tag: back_translate
 hard_label: True
 uratio: 2
 ulb_loss_ratio: 1.0
+threshold_algo: flexmatch
 
 # device configs
 gpu: None

@@ -21,14 +21,18 @@ from semilearn.algorithms.utils import SSL_Argument, str2bool
 class MarginMatchMMBTBert(AlgorithmBase):
     def __init__(self, args, net_builder, tb_log=None, logger=None):
         self.init(T=args.T, hard_label=args.hard_label, ema_p=args.ema_p, use_quantile=args.use_quantile, clip_thresh=args.clip_thresh,
-                  threshold_algo=args.threshold_algo)
+                  p_cutoff=args.p_cutoff, thresh_warmup=args.thresh_warmup, threshold_algo=args.threshold_algo)
         
         super().__init__(args, net_builder, tb_log, logger) 
     
 
-    def init(self, T, hard_label=True, ema_p=0.999, use_quantile=True, clip_thresh=False, threshold_algo='freematch'):
+    def init(self, T, p_cutoff, hard_label=True, ema_p=0.999, use_quantile=True, clip_thresh=False, thresh_warmup=True, threshold_algo='freematch'):
         self.T = T
+        self.p_cutoff = p_cutoff
         self.use_hard_label = hard_label
+        
+        self.thresh_warmup = thresh_warmup
+
         self.ema_p = ema_p
         self.use_quantile = use_quantile
         self.clip_thresh = clip_thresh
@@ -169,6 +173,8 @@ class MarginMatchMMBTBert(AlgorithmBase):
             SSL_Argument('--ent_loss_ratio', float, 0.01),
             SSL_Argument('--use_quantile', str2bool, False),
             SSL_Argument('--clip_thresh', str2bool, False),
+            SSL_Argument('--p_cutoff', float, 0.95),
+            SSL_Argument('--thresh_warmup', str2bool, True),
         ]
     
     # @overrides
