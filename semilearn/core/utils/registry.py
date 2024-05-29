@@ -69,7 +69,7 @@ ALL_MODULES = [
     # NOTE: add all algorithms here
     ('semilearn.algorithms', ['adamatch', 'comatch', 'crmatch', 'dash', 'fixmatch', 'flexmatch', 'fullysupervised', 'meanteacher',
                               'mixmatch', 'pimodel', 'pseudolabel', 'remixmatch', 'simmatch', 'uda', 'vat', 'softmatch', 'freematch', 'defixmatch',
-                              'disaster.fixmatch', 'disaster.flexmatch', 'disaster.freematch', 'disaster.marginmatch']),
+                              'disaster.fixmatch', 'disaster.flexmatch', 'disaster.freematch', 'disaster.marginmatch', 'disaster.multihead_apm']),
     ('semilearn.imb_algorithms', ['abc', 'cossl', 'adsh', 'crest', 'darp', 'daso', 'debiaspl', 'saw', 'tras'])
 ]
 

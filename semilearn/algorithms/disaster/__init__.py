@@ -10,3 +10,6 @@ from .flexmatch.flexmatch_mmbt_bert import FlexMatchMMBTBert
 from .freematch.freematch_mmbt_bert import FreeMatchMMBTBert
 
 from .marginmatch.marginmatch_mmbt_bert import MarginMatchMMBTBert
+
+from .multihead_apm.multihead_apm import MultiheadAPM
+from .multihead_apm.multihead_apm_mmbt_bert import MultiheadAPMMMBTBert

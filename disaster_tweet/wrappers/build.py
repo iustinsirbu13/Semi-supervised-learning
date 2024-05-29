@@ -12,6 +12,9 @@ class ALGO_WRAPPERS:
 
     MARGINMATCH = 'marginmatch'
     MARGINMATCH_MMBT_BERT = 'marginmatch_mmbt_bert'
+    
+    MULTIHEAD_APM = 'multihead_apm'
+    MULTIHEAD_APM_MMBT_BERT = 'multihead_apm_mmbt_bert'
 
 
 def build_wrapper(dataset, algorithm, config, build_algo=True):
@@ -75,6 +78,18 @@ def build_wrapper(dataset, algorithm, config, build_algo=True):
     elif algorithm == ALGO_WRAPPERS.MARGINMATCH_MMBT_BERT:
         from disaster_tweet.wrappers.marginmatch.marginmatch_mmbt_bert_wrapper import MarginMatchMMBTBertWrapper
         return MarginMatchMMBTBertWrapper(config, build_algo)
+    
+    ##########################
+    ##  Multihead APM Start ##
+    ##########################
+
+    elif algorithm == ALGO_WRAPPERS.MULTIHEAD_APM:
+        from disaster_tweet.wrappers.multihead_apm.multihead_apm_wrapper import MultiheadAPMWrapper
+        return MultiheadAPMWrapper(config, build_algo)
+    
+    elif algorithm == ALGO_WRAPPERS.MULTIHEAD_APM_MMBT_BERT:
+        from disaster_tweet.wrappers.multihead_apm.multihead_apm_mmbt_bert_wrapper import MultiheadAPMMMBTBertWrapper
+        return MultiheadAPMMMBTBertWrapper(config, build_algo)
     
     raise Exception(f'Unknown disaster algorithm: {algorithm}')
     
