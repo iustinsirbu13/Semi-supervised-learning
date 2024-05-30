@@ -56,7 +56,7 @@ class MarginMatchMMBTBert(AlgorithmBase):
         ema_model.load_state_dict(self.model.state_dict())
         return ema_model
 
-
+    # @overrides
     def set_hooks(self):
         self.register_hook(PseudoLabelingHook(), "PseudoLabelingHook")
 
