@@ -1,4 +1,4 @@
-algorithm: mulithead_apm_mmbt_bert
+algorithm: multihead_apm_mmbt_bert
 
 # optimization configs
 epoch: 20
