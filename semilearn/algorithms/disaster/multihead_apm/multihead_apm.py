@@ -95,7 +95,7 @@ class MultiheadAPM(AlgorithmBase):
     def get_loss(self, lb_loss, ulb_loss):
         return lb_loss + self.lambda_u * ulb_loss
     
-    def __train_step(self, logits, y_lb, idx_ulb):
+    def train_step_base(self, logits, y_lb, idx_ulb):
         num_lb = y_lb.shape[0]
         num_ulb = idx_ulb.shape[0]
 
@@ -135,7 +135,7 @@ class MultiheadAPM(AlgorithmBase):
         inputs = inputs.to(self.args.device)
         logits = self.model(inputs)['logits']
 
-        return self.__train_step(logits, y_lb, idx_ulb)
+        return self.train_step_base(logits, y_lb, idx_ulb)
     
     # @overrides
     def get_logits(self, data, out_key):

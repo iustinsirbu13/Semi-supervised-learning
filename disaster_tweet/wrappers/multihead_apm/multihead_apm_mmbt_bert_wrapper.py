@@ -7,7 +7,8 @@ from disaster_tweet.wrappers.multihead_apm.multihead_apm_mmbt_base_wrapper impor
 
 class MultiheadAPMMMBTBertWrapper(MultiheadAPMMMBTBaseWrapper):
     def __init__(self, config, build_algo=True):
-        assert self.algorithm == ALGO_WRAPPERS.MULTIHEAD_APM_MMBT_BERT
+        assert config.algorithm == ALGO_WRAPPERS.MULTIHEAD_APM_MMBT_BERT
+        config.net = 'multihead_mmbt_bert'
         
         if not has_argument(config, 'num_heads'):
             config.num_heads = 3

@@ -32,7 +32,7 @@ class MultiheadAPMMMBTBert(MultiheadAPM):
 
         logits = self.model(sentences, masks, segments, images)
         
-        return self.__train_step(logits, lb_target, idx_ulb)
+        return self.train_step_base(logits, lb_target, idx_ulb)
 
 
     # @overrides
