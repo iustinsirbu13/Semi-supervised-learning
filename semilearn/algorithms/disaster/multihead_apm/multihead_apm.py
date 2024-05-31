@@ -1,8 +1,10 @@
 import torch
 import torch.nn.functional as F
 
+from semilearn.algorithms.utils import SSL_Argument, str2bool
 from semilearn.algorithms.disaster.multihead_apm.apm_hook import APMHook
 from semilearn.algorithms.disaster.multihead_apm.apm_log_hook import APMLogHook
+from semilearn.algorithms.disaster.multihead_apm.debug_hook import DebugHook
 from semilearn.core.algorithmbase import AlgorithmBase
 from semilearn.core.utils import ALGORITHMS
 
@@ -14,6 +16,8 @@ class MultiheadAPM(AlgorithmBase):
 
         # multihead specific arguments
         self.num_heads = args.num_heads
+
+        self.use_debug = args.use_debug
 
     # @overrides
     def set_model(self):
@@ -35,6 +39,10 @@ class MultiheadAPM(AlgorithmBase):
     # @overrides
     def set_hooks(self):
         self.register_hook(APMHook(self.args, APMLogHook()), "APMHook")
+        
+        if self.use_debug:
+            self.register_hook(DebugHook(), "DebugHook")
+
         super().set_hooks()
 
     def get_head_logits(self, head_id, logits, num_lb):
@@ -149,3 +157,9 @@ class MultiheadAPM(AlgorithmBase):
 
         # Use all heads for prediction
         return sum(logits) / self.num_heads
+    
+    @staticmethod
+    def get_argument():
+        return [
+            SSL_Argument('--use_debug', str2bool, False)
+        ]
