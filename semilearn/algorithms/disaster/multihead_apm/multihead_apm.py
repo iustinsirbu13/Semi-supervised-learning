@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 
 from semilearn.algorithms.disaster.multihead_apm.apm_hook import APMHook
+from semilearn.algorithms.disaster.multihead_apm.apm_log_hook import APMLogHook
 from semilearn.core.algorithmbase import AlgorithmBase
 from semilearn.core.utils import ALGORITHMS
 
@@ -33,7 +34,7 @@ class MultiheadAPM(AlgorithmBase):
 
     # @overrides
     def set_hooks(self):
-        self.register_hook(APMHook(), "APMHook")
+        self.register_hook(APMHook(self.args, APMLogHook()), "APMHook")
         super().set_hooks()
 
     def get_head_logits(self, head_id, logits, num_lb):
@@ -64,9 +65,9 @@ class MultiheadAPM(AlgorithmBase):
         else:
             head_id1, head_id2 = 0, 1
 
-        self.call_hook("update", "APMHook", logits_x_ulb_w=ulb_weak_logits, idx_ulb=idx_ulb, head_id=head_id)
+        self.call_hook("update", "APMHook", logits_x_ulb_w=ulb_weak_logits[head_id], idx_ulb=idx_ulb, head_id=head_id)
 
-        num_ulb = ulb_strong_logits[head_id].shape[0]
+        num_ulb = idx_ulb.shape[0]
         multihead_labels = torch.ones(num_ulb, dtype=torch.int64).to(self.args.device) * -1
 
         for i in range(num_ulb):
@@ -84,7 +85,7 @@ class MultiheadAPM(AlgorithmBase):
         if 1 not in mask:
             return torch.tensor(0).to(self.args.device)
 
-        return F.cross_entropy(ulb_strong_logits[head_id][mask == 1], multihead_labels[head_id][mask == 1])
+        return F.cross_entropy(ulb_strong_logits[head_id][mask == 1], multihead_labels[mask == 1])
 
 
     def get_unsupervised_loss(self, ulb_weak_logits, ulb_strong_logits, pseudo_labels, idx_ulb):
