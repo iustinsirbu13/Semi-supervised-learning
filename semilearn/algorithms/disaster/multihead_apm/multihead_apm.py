@@ -74,7 +74,7 @@ class MultiheadAPM(AlgorithmBase):
         else:
             head_id1, head_id2 = 0, 1
 
-        self.call_hook("update", "APMHook", logits_x_ulb_w=ulb_weak_logits[head_id], idx_ulb=idx_ulb, head_id=head_id)
+        self.call_hook("update", "APMHook", logits_x_ulb_w=ulb_weak_logits[head_id], logits_x_ulb_s=ulb_strong_logits, idx_ulb=idx_ulb, head_id=head_id)
 
         num_ulb = idx_ulb.shape[0]
         multihead_labels = torch.ones(num_ulb, dtype=torch.int64).to(self.args.device) * -1
