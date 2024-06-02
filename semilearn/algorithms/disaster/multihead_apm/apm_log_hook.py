@@ -12,16 +12,15 @@ class APMLogHook(Hook):
         for head_id, head_id1, head_id2 in [(0, 1, 2), (1, 0, 2), (2, 0, 1)]:
             # Percent of weak samples where both heads have reached an agreement
             weak_agreement_mask = (hook.weak_labels[head_id1] == hook.weak_labels[head_id2])
-            weak_agreement_percent = weak_agreement_mask.float().mean()
-            algorithm.print_fn(f"HEAD[{head_id}]: Weak agreement percent={weak_agreement_percent}")
+            algorithm.print_fn(f"HEAD[{head_id}]: Weak agreement percent={weak_agreement_mask.float().mean()}")
 
             # Percent of strong samples where both heads have reached an agreement
             strong_agreement_mask = (hook.strong_labels[head_id1] == hook.strong_labels[head_id2])
-            strong_agreement_percent = strong_agreement_mask.float().mean()
-            algorithm.print_fn(f"HEAD[{head_id}]: Strong agreement percent={strong_agreement_percent}")
+            algorithm.print_fn(f"HEAD[{head_id}]: Strong agreement percent={strong_agreement_mask.float().mean()}")
 
             # Percent of weak samples where both heads have reached an agreement and at least one exceeded the APM threshold
-            algorithm.print_fn(f"HEAD[{head_id}]: Weak agreement percent with APM={hook.weak_agreement_mask.float().mean()}")
+            weak_agreement_percent = hook.weak_agreement_mask[head_id].float().mean()
+            algorithm.print_fn(f"HEAD[{head_id}]: Weak agreement percent with APM={weak_agreement_percent}")
 
             # Number of samples that were included per class using APM threshold (heads didn't reach agreement)
             apm_mask = (hook.apm_labels[head_id] != -1)
