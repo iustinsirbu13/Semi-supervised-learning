@@ -20,4 +20,9 @@ class DebugHook(Hook):
 
     # @overrides
     def before_train_epoch(self, algorithm):
-        self.debug_network(algorithm.model, algorithm.epoch)
+        '''
+        Track additional debug info
+        '''
+        # self.debug_network(algorithm.model, algorithm.epoch)
+
+        return
