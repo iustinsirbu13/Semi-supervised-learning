@@ -9,6 +9,9 @@ class MultiheadAPMBaseWrapper(SSLDisasterWrapper):
         if not has_argument(config, 'smoothness'):
             config.smoothness = 0.997
 
+        if not has_argument(config, 'use_agreement_apm'):
+            config.use_agreement_apm = False
+
         super().__init__(config, build_algo)
 
     # @overrides

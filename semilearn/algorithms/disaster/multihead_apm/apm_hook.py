@@ -21,6 +21,9 @@ class APMHook(Hook):
         # predictions for weakly augmented data for each head (head pseudolabels)
         self.weak_labels = torch.ones((self.num_heads, self.ulb_dest_len)).to(args.device) * -1
 
+        # weak labels that exceed APM threshold for agreement
+        self.weak_agreement_mask = torch.zeros((self.num_heads, self.ulb_dest_len), dtype=torch.bool).to(args.device)
+
         # predictions for strongly augmented data for each head
         self.strong_labels = torch.ones((self.num_heads, self.ulb_dest_len), dtype=torch.int64).to(args.device) * -1
 
@@ -41,13 +44,27 @@ class APMHook(Hook):
 
         self.strong_labels[head_id][idx_ulb] = torch.max(logits_x_ulb_s, dim=-1)[1]
     
-    def get_apm_label(self, algorithm, idx, label1, label2, head_id):
+    def get_apm_label(self, algorithm, idx, label1, label2, head_id, head_id1, head_id2):
+        apm_pass1 = self.apm[head_id1][idx][label1] >= self.apm_cutoff[head_id][label1]
+        apm_pass2 = self.apm[head_id2][idx][label2] >= self.apm_cutoff[head_id][label2]
+
+        if label1 == label2:
+            # No need to check APM for agreement
+            if not self.args.use_agreement_apm:
+                self.weak_agreement_mask[head_id][idx] = True
+                return label1
+            
+            # At least one head APM needs to exceed threshold
+            if apm_pass1 or apm_pass2:
+                self.weak_agreement_mask[head_id][idx] = True
+                return label1
+            
+            self.weak_agreement_mask[head_id][idx] = False
+            return -1
+
         # We don't have default apm_cutoff values for the first epoch
         if algorithm.epoch == 0:
             return -1
-        
-        apm_pass1 = self.apm[head_id][idx][label1] >= self.apm_cutoff[head_id][label1]
-        apm_pass2 = self.apm[head_id][idx][label2] >= self.apm_cutoff[head_id][label2]
 
         # Both labels exceed the thresholds => We don't know what to choose, so ignore
         if apm_pass1 and apm_pass2:

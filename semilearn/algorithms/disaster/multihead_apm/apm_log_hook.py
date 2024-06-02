@@ -20,6 +20,9 @@ class APMLogHook(Hook):
             strong_agreement_percent = strong_agreement_mask.float().mean()
             algorithm.print_fn(f"HEAD[{head_id}]: Strong agreement percent={strong_agreement_percent}")
 
+            # Percent of weak samples where both heads have reached an agreement and at least one exceeded the APM threshold
+            algorithm.print_fn(f"HEAD[{head_id}]: Weak agreement percent with APM={hook.weak_agreement_mask.float().mean()}")
+
             # Number of samples that were included per class using APM threshold (heads didn't reach agreement)
             apm_mask = (hook.apm_labels[head_id] != -1)
             apm_percent = apm_mask.float().mean()

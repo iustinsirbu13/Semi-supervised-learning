@@ -66,7 +66,6 @@ class MultiheadAPM(AlgorithmBase):
         '''
         This works only for 3 heads
         '''
-
         if head_id == 0:
             head_id1, head_id2 = 1, 2
         elif head_id == 1:
@@ -74,22 +73,14 @@ class MultiheadAPM(AlgorithmBase):
         else:
             head_id1, head_id2 = 0, 1
 
-        self.call_hook("update", "APMHook", logits_x_ulb_w=ulb_weak_logits[head_id], logits_x_ulb_s=ulb_strong_logits[head_id], idx_ulb=idx_ulb, head_id=head_id)
-
         num_ulb = idx_ulb.shape[0]
         multihead_labels = torch.ones(num_ulb, dtype=torch.int64).to(self.args.device) * -1
 
         for i in range(num_ulb):
             label1 = pseudo_labels[head_id1][i]
             label2 = pseudo_labels[head_id2][i]
-
-            # If both labels are equal we use the current sample without checking the APM threshold
-            if label1 == label2:
-                multihead_labels[i] = label1
-                continue
-            
-            multihead_labels[i] = self.call_hook("get_apm_label", "APMHook", head_id=head_id, idx=idx_ulb[i], label1=label1, label2=label2)
-            
+            multihead_labels[i] = self.call_hook("get_apm_label", "APMHook", head_id=head_id, head_id1=head_id1, head_id2=head_id2, idx=idx_ulb[i], label1=label1, label2=label2)
+        
         mask = multihead_labels != -1
         if 1 not in mask:
             return torch.tensor(0).to(self.args.device)
@@ -98,6 +89,9 @@ class MultiheadAPM(AlgorithmBase):
 
 
     def get_unsupervised_loss(self, ulb_weak_logits, ulb_strong_logits, pseudo_labels, idx_ulb):
+        for head_id in range(self.num_heads):
+            self.call_hook("update", "APMHook", logits_x_ulb_w=ulb_weak_logits[head_id], logits_x_ulb_s=ulb_strong_logits[head_id], idx_ulb=idx_ulb, head_id=head_id)
+        
         head_losses = [self.get_head_unsupervised_loss(ulb_weak_logits, ulb_strong_logits, pseudo_labels, idx_ulb, head_id) for head_id in range(self.num_heads)]
         return sum(head_losses) / self.num_heads
     

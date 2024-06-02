@@ -11,6 +11,9 @@ class MultiheadAPMMMBTBaseWrapper(SSLDisasterWrapper):
         if not has_argument(config, 'smoothness'):
             config.smoothness = 0.997
 
+        if not has_argument(config, 'use_agreement_apm'):
+            config.use_agreement_apm = False
+
         self.tokenizer = self.get_tokenizer(config).tokenize
         self.vocab = self.get_vocab(config)
         
