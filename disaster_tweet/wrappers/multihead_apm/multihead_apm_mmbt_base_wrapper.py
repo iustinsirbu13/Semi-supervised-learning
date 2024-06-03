@@ -14,6 +14,8 @@ class MultiheadAPMMMBTBaseWrapper(SSLDisasterWrapper):
         if not has_argument(config, 'use_agreement_apm'):
             config.use_agreement_apm = False
 
+        assert has_argument(config, 'apm_percentile')
+
         self.tokenizer = self.get_tokenizer(config).tokenize
         self.vocab = self.get_vocab(config)
         

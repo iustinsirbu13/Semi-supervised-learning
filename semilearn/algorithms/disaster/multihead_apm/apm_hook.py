@@ -13,6 +13,7 @@ class APMHook(Hook):
         self.ulb_dest_len = args.ulb_dest_len
 
         self.smoothness = args.smoothness
+        self.apm_percentile = args.apm_percentile
         self.apm = torch.zeros((self.num_heads, self.ulb_dest_len, self.num_classes)).to(args.device)
 
         # apm_cutoff[head_id][class_id] = APM threshold for class_id when head_id is excluded
@@ -106,8 +107,8 @@ class APMHook(Hook):
                 apm_set2 = self.apm[head_id2][mask]
                 apm_set = torch.cat((apm_set1[:, label], apm_set2[:, label]), dim=0)
 
-                # Use 95th percentile as the new threshold
-                self.apm_cutoff[head_id][label] = torch.quantile(apm_set.float(), 0.95)
+                # Use apm_percentile as the new threshold
+                self.apm_cutoff[head_id][label] = max(0, torch.quantile(apm_set.float(), self.apm_percentile))
 
 
         self.apm_log_hook.after_train_epoch(algorithm)
