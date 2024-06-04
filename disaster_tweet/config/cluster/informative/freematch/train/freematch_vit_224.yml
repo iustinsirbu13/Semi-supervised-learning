@@ -1,0 +1,42 @@
+algorithm: freematch
+net: vit_base_patch16_224
+use_pretrain: False
+
+# optimization configs
+epoch: 20  
+num_train_iter: 1000000
+num_eval_iter: 1000000   
+num_log_iter: 50    
+optim: AdamW
+lr: 0.0005
+layer_decay: 0.5
+batch_size: 8
+eval_batch_size: 8
+
+# dataset configs
+dataset: disaster
+task: informative
+num_labels: 0 
+crop_ratio: 0.875
+train_filename: train_eda.jsonl
+dev_filename: dev_eda.jsonl
+test_filename: test_eda.jsonl
+unlabeled_filename: unlabeled_eda.jsonl
+data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/informative
+img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets
+
+# algorithm specific configs
+hard_label: True
+uratio: 3
+ulb_loss_ratio: 1.0
+
+# device configs
+gpu: 0
+world_size: 1
+num_workers: 2
+distributed: False
+
+# test configs
+save_dir: ./saved_models/informative/freematch/train
+save_name: freematch-vit-224
+overwrite: False
