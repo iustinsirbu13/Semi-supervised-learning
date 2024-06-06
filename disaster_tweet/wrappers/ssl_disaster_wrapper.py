@@ -26,7 +26,7 @@ class SSLDisasterWrapper(SSLBaseWrapper):
         if config.task == 'humanitarian':
             config.labels = ['not_humanitarian', 'other_relevant_information', 'rescue_volunteering_or_donation_effort', 'infrastructure_and_utility_damage', 'affected_individuals']
         elif config.task == 'informative':
-            config.labels = ['informative', 'uninformative']
+            config.labels = ['informative', 'not_informative']
         elif config.task == 'damage':
             config.labels = ['damage', 'no damage']
         else:
