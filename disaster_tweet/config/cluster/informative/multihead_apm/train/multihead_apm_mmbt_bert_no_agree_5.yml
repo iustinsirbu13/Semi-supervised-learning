@@ -30,7 +30,7 @@ strong_text_tag: eda_02
 hard_label: True
 uratio: 3
 ulb_loss_ratio: 1.0
-apm_percentile: 0.95
+apm_percentile: 0.05
 # use_debug: True
 
 # device configs
@@ -41,5 +41,5 @@ distributed: False
 
 # test configs
 save_dir: ./saved_models/informative/multihead_apm/train
-save_name: multihead-apm-mmbt-bert-no-agree-95
+save_name: multihead-apm-mmbt-bert-no-agree-5
 overwrite: False
