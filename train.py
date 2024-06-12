@@ -414,7 +414,7 @@ def main_worker(gpu, ngpus_per_node, args):
         trainer = Trainer(args, model)
 
     if args.eval_only == False:
-        # START TRAINING of FixMatch
+        # START TRAINING
         logger.info("Model training")
         if wrapper is not None:
             trainer.fit(wrapper.train_loader, wrapper.unlabeled_loader, wrapper.dev_loader)
