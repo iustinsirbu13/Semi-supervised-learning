@@ -1,0 +1,52 @@
+algorithm: multihead_apm
+net: wrn_multihead_28_2
+
+# optimization configs
+epoch: 1024
+num_train_iter: 1048576
+num_eval_iter: 5120
+num_log_iter: 256
+num_labels: 400
+batch_size: 64
+eval_batch_size: 256
+lr: 0.03
+momentum: 0.9
+weight_decay: 0.001
+layer_decay: 1.0
+optim: SGD
+
+# other configs
+amp: False
+clip: 0.0
+use_cat: True
+use_tensorboard: True
+use_wandb: False
+
+# dataset configs
+dataset: cifar100
+img_size: 32
+crop_ratio: 0.875
+num_classes: 100
+net_from_name: False
+data_dir: ./data
+train_sampler: RandomSampler
+seed: 0
+
+# algorithm specific configs
+hard_label: True
+uratio: 7
+ulb_loss_ratio: 1.0
+use_agreement_apm: True
+apm_percentile: 0.05
+seed: 0
+
+# device configs
+gpu: 0
+world_size: 1
+num_workers: 2
+distributed: False
+
+# test configs
+save_dir: ./saved_models/classic_cv/multihead_apm
+save_name: agree_cifar100_400_0
+overwrite: False

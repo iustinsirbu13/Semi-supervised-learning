@@ -28,7 +28,7 @@ use_wandb: False
 # dataset configs
 dataset: cifar100
 img_size: 32
-num_labels: 200
+num_labels: 400
 num_classes: 100
 crop_ratio: 0.875
 net_from_name: False
@@ -52,5 +52,5 @@ distributed: False
 
 # test configs
 save_dir: ./saved_models/usb_cv/multihead_apm/
-save_name: agree_5_cifar_100_200
+save_name: agree_5_cifar100_200
 overwrite: False
