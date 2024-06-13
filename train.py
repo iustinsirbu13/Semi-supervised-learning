@@ -379,6 +379,15 @@ def main_worker(gpu, ngpus_per_node, args):
     wrapper = build_wrapper(args.dataset, args.algorithm, args, build_algo=False)
     args.wrapper = wrapper
 
+    if args.gpu is None or args.gpu == 'None':
+        args.gpu = None
+        args.device = 'cpu'
+    else:
+        args.device = torch.device('cuda', args.gpu)
+
+    if args.train_sampler == 'None':
+        args.train_sampler = None
+
     logger.info(f"Print config: ")
     for k, v in vars(args).items():
         logger.info(f"\t{k}: {v}")
@@ -410,8 +419,7 @@ def main_worker(gpu, ngpus_per_node, args):
         logger.info(("Warmup stage"))
         model.warmup()
     
-    if wrapper is not None:
-        trainer = Trainer(args, model)
+    trainer = Trainer(args, model)
 
     if args.eval_only == False:
         # START TRAINING
@@ -419,10 +427,7 @@ def main_worker(gpu, ngpus_per_node, args):
         if wrapper is not None:
             trainer.fit(wrapper.train_loader, wrapper.unlabeled_loader, wrapper.dev_loader)
         else:
-            model.train()
-            # print validation (and test results)
-            for key, item in model.results_dict.items():
-                logger.info(f"Model result - {key} : {item}")
+            trainer.fit(model.loader_dict['train_lb'], model.loader_dict['train_ulb'], model.loader_dict['eval'])
 
         if hasattr(model, "finetune"):
             logger.info("Finetune stage")
@@ -430,11 +435,12 @@ def main_worker(gpu, ngpus_per_node, args):
 
         logging.warning(f"GPU {args.rank} training is FINISHED")
 
+    logging.warning(f"GPU {args.rank} test STARTING")
     if wrapper is not None:
-        logging.warning(f"GPU {args.rank} test STARTING")
         trainer.evaluate(wrapper.test_loader)
-        logging.warning(f"GPU {args.rank} test is FINISHED")
-
+    else:
+        trainer.evaluate(model.loader_dict['test'])
+    logging.warning(f"GPU {args.rank} test is FINISHED")
 
 if __name__ == "__main__":
     args = get_config()

@@ -156,5 +156,7 @@ class MultiheadAPM(AlgorithmBase):
     @staticmethod
     def get_argument():
         return [
-            SSL_Argument('--use_debug', str2bool, False)
+            SSL_Argument('--use_debug', str2bool, False),
+            SSL_Argument('--num_heads', int, 3),
+            SSL_Argument('--smoothness', float, 0.997)
         ]
