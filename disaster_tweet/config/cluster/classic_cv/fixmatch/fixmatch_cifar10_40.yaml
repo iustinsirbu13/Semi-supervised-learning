@@ -23,7 +23,7 @@ use_tensorboard: True
 use_wandb: False
 
 # dataset configs
-dataset: cifar100
+dataset: cifar10
 img_size: 32
 crop_ratio: 0.875
 num_classes: 10
