@@ -19,10 +19,7 @@ class FixMatchBase(AlgorithmBase):
         """
         initialize model
         """
-        if self.args.dataset == 'disaster':
-            model = self.net_builder(self.args)
-        else:
-            model = super().set_model()
+        model = self.net_builder(self.args)
         return model
 
     # @overrides
@@ -30,11 +27,8 @@ class FixMatchBase(AlgorithmBase):
         """
         initialize ema model from model
         """
-        if self.args.dataset == 'disaster':
-            ema_model = self.net_builder(self.args)
-            ema_model.load_state_dict(self.model.state_dict())
-        else:
-            ema_model = super().set_ema_model()
+        ema_model = self.net_builder(self.args)
+        ema_model.load_state_dict(self.model.state_dict())
         return ema_model
     
     def get_supervised_loss(self, lb_logits, lb_target):
