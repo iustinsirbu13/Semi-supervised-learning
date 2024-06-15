@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, precision_score, recall_score
 import sys
 
 task = sys.argv[1]
@@ -81,6 +81,13 @@ if task == 'humanitarian':
                 [0.056,      0.,         0.912,      0.016,      0.016     ],
                 [0.04938272, 0.,         0.03703704, 0.88888889, 0.02469136],
                 [0.,         0.,         0.44444444, 0.22222222, 0.33333333]]
+
+    elif algo == 'marginmatch':
+        confusion_matrix = [[0.8685259,  0.03984064, 0.07569721, 0.01593625, 0.        ],
+            [0.10212766, 0.86808511, 0.0212766,  0.00851064, 0.        ],
+            [0.04,       0.,         0.96,       0.,         0.        ],
+            [0.04938272, 0.02469136, 0.0617284,  0.85185185, 0.01234568],
+            [0.11111111, 0.,         0.55555556, 0.,         0.33333333]]
 
     elif algo == 'multihead':
         if run == 1:
@@ -241,7 +248,15 @@ elif task == 'informative':
         elif run == 2:
             confusion_matrix = [[0.94054581, 0.05945419],
                 [0.17131474, 0.82868526]]
-    
+
+    elif algo == 'fixmatch-supervised-lb-10':
+        confusion_matrix = [[0.45658537, 0.54341463],
+            [0.44532803, 0.55467197]]
+        
+    elif algo == 'multihead-apm-agree-5-no-low-lb-10':
+        confusion_matrix =  [[1.,         0.        ],
+            [0.99801193, 0.00198807]]
+
     else:
         assert False
 
@@ -263,6 +278,18 @@ f1_macro = f1_score(true_labels, pred_labels, average='macro')
 f1_micro = f1_score(true_labels, pred_labels, average='micro')
 f1_weighted = f1_score(true_labels, pred_labels, average='weighted')
 
+precision_macro = precision_score(true_labels, pred_labels, average='macro')
+precision_weighted = precision_score(true_labels, pred_labels, average='weighted')
+
+recall_macro = recall_score(true_labels, pred_labels, average='macro')
+recall_weighted = recall_score(true_labels, pred_labels, average='weighted')
+
+print(f'Precision (Macro): {precision_macro}')
+print(f'Precision (Weighted): {round(precision_weighted, 4)}')
+
+print(f'Recall (Macro): {recall_macro}')
+print(f'Recall (Weighted): {round(recall_weighted, 4)}')
+
 print(f'F1 Score (Macro): {f1_macro}')
 print(f'F1 Score (Micro): {f1_micro}')
-print(f'F1 Score (Weighted): {f1_weighted}')
+print(f'F1 Score (Weighted): {round(f1_weighted, 4)}')

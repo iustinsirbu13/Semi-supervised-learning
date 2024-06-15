@@ -414,9 +414,9 @@ class AlgorithmBase:
         y_logits = np.concatenate(y_logits)
         top1 = accuracy_score(y_true, y_pred)
         balanced_top1 = balanced_accuracy_score(y_true, y_pred)
-        precision = precision_score(y_true, y_pred, average="macro")
-        recall = recall_score(y_true, y_pred, average="macro")
-        F1 = f1_score(y_true, y_pred, average="macro")
+        precision = precision_score(y_true, y_pred, average="weighted")
+        recall = recall_score(y_true, y_pred, average="weighted")
+        F1 = f1_score(y_true, y_pred, average="weighted")
 
         cf_mat = confusion_matrix(y_true, y_pred, normalize="true")
         self.print_fn("confusion matrix:\n" + np.array_str(cf_mat))

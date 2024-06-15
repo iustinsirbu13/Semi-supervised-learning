@@ -89,9 +89,9 @@ class Trainer:
     def evaluate(self, data_loader, use_ema_model=False):
         y_pred, y_logits, y_true = self.predict(data_loader, use_ema_model, return_gt=True)
         top1 = accuracy_score(y_true, y_pred)
-        precision = precision_score(y_true, y_pred, average='macro')
-        recall = recall_score(y_true, y_pred, average='macro')
-        f1 = f1_score(y_true, y_pred, average='macro')
+        precision = precision_score(y_true, y_pred, average='weighted')
+        recall = recall_score(y_true, y_pred, average='weighted')
+        f1 = f1_score(y_true, y_pred, average='weighted')
         cf_mat = confusion_matrix(y_true, y_pred, normalize='true')
         self.logger.info("confusion matrix")
         self.logger.info(cf_mat)
