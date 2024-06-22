@@ -16,7 +16,8 @@ class MarginMatchHook(Hook):
 
         # predicitions for weakly augmented data (used for monitoring class APM after each epoch)
         self.weak_labels = torch.ones(self.ulb_dest_len).to(args.device) * -1
-
+    
+    @torch.no_grad()
     def update(self, algorithm, logits_x_ulb_w, logits_x_ulb_s, idx_ulb):
         epoch = algorithm.epoch
         
@@ -28,7 +29,8 @@ class MarginMatchHook(Hook):
             self.apm[idx] = pm * self.smoothness / (1 + epoch) + self.apm[idx] * (1 - self.smoothness / (1 + epoch))
 
             self.weak_labels[idx] = pseudo_labels[i][0]
-
+    
+    @torch.no_grad()
     def masking(self, algorithm, logits_x_ulb_w, logits_x_ulb_s, idx_ulb):
         self.update(algorithm, logits_x_ulb_w, logits_x_ulb_s, idx_ulb)
 

@@ -3,7 +3,7 @@ net: wrn_multihead_28_2
 
 # optimization configs
 epoch: 512
-num_train_iter: 1048576
+num_train_iter: 524288
 num_eval_iter: 5120
 num_log_iter: 256
 num_labels: 40
@@ -33,7 +33,7 @@ train_sampler: RandomSampler
 
 # algorithm specific configs
 hard_label: True
-uratio: 7
+uratio: 3
 num_heads: 3
 ulb_loss_ratio: 1.0
 use_agreement_apm: True
@@ -41,10 +41,10 @@ apm_percentile: 0.05
 seed: 0
 
 # device configs
-gpu: 0
+gpu: None
 world_size: 1
-num_workers: 1
-distributed: False
+num_workers: 4
+multiprocessing_distributed: True
 
 # test configs
 save_dir: ./saved_models/classic_cv/multihead_apm
