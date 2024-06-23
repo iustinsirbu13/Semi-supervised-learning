@@ -41,5 +41,5 @@ distributed: False
 resume: True
 save_dir: ./saved_models/informative/fixmatch/eval
 save_name: fixmatch-mmbt-bert-hard
-load_path: ./saved_models/informative/fixmatch/train/fixmatch-mmbt-bert-hard/model_best.pth
+load_path: ./saved_models/informative/fixmatch/train/fixmatch-mmbt-bert-hard-run1/model_best.pth
 eval_only: True
