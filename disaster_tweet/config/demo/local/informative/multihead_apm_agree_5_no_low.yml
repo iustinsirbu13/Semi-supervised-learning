@@ -43,5 +43,5 @@ distributed: False
 resume: True
 save_dir: ./saved_models/informative/multihead_apm/eval
 save_name: multihead_apm_agree_5_no_low
-load_path: ./saved_models/informative/multihead_apm/train/multihead_apm_agree_5_no_low/model_best.pth
+load_path: ./saved_models/informative/multihead_apm/train/multihead-apm-agree-5-no-low/model_best.pth
 eval_only: True
