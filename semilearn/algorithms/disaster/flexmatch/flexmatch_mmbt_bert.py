@@ -168,5 +168,4 @@ class FlexMatchMMBTBert(AlgorithmBase):
 
     # @overrides
     def get_targets(self, data, *args, **kwargs):
-        targets = data['lb_target'].to(self.args.device)
-        return torch.squeeze(targets)
+        return data['lb_target'].to(self.args.device)

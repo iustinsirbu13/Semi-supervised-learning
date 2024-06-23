@@ -42,6 +42,6 @@ distributed: False
 # test configs
 resume: True
 save_dir: ./saved_models/informative/multihead_apm/eval
-save_name: multihead_apm_agree_5_no_low
+save_name: multihead-apm-mmbt-bert-agree-5-no-low
 load_path: ./saved_models/informative/multihead_apm/train/multihead-apm-mmbt-bert-agree-5-no-low-run1/model_best.pth
 eval_only: True

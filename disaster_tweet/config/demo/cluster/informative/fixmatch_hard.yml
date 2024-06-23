@@ -1,4 +1,4 @@
-algorithm: multihead_apm_mmbt_bert
+algorithm: fixmatch_mmbt_bert
 
 # optimization configs
 epoch: 20
@@ -21,8 +21,8 @@ train_filename: train.jsonl
 dev_filename: dev.jsonl
 test_filename: test.jsonl
 unlabeled_filename: unlabeled.jsonl
-data_dir: C:\Users\popov\Desktop\licenta\datasets\demo\informative
-img_dir: C:\Users\popov\Desktop\licenta\datasets\demo\image
+data_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/demo/informative
+img_dir: /export/home/acs/stud/r/robert.popovici/licenta/datasets/demo/image
 weak_text_tag: eda_01 
 strong_text_tag: eda_02 
 
@@ -30,18 +30,16 @@ strong_text_tag: eda_02
 hard_label: True
 uratio: 3
 ulb_loss_ratio: 1.0
-use_agreement_apm: True
-apm_percentile: 0.05
 
 # device configs
-gpu: None
+gpu: 0
 world_size: 1
 num_workers: 2
 distributed: False
 
 # test configs
 resume: True
-save_dir: ./saved_models/informative/multihead_apm/eval
-save_name: multihead-apm-agree-5-no-low
-load_path: ./saved_models/informative/multihead_apm/train/multihead-apm-agree-5-no-low/model_best.pth
+save_dir: ./saved_models/informative/fixmatch/eval
+save_name: fixmatch-mmbt-bert-hard
+load_path: ./saved_models/informative/fixmatch/train/fixmatch-mmbt-bert-hard/model_best.pth
 eval_only: True
