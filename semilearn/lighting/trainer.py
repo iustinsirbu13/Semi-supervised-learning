@@ -124,7 +124,7 @@ class Trainer:
                 y_logits.append(torch.softmax(logits, dim=-1).cpu().numpy())
 
                 for i in range(len(y_true_list)):
-                    sample_id = data['sample_id'][i]
+                    sample_id = data['x_lb_id'][i]
                     self.logger.info(f"Sample[{sample_id}] --> Predicted class={y_true_list[i]}  Actual class={y_pred_list[i]}  Logits={y_logits_list[i]}")
 
         y_true = np.array(y_true)

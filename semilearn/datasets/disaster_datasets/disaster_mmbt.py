@@ -136,7 +136,7 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
             items['lb_weak_mask'] = weak_text_tensors[2]
 
             items['lb_target'] = target
-            items['sample_id'] = sample_id
+            items['x_lb_id'] = sample_id
         else:
             items['ulb_weak_image'] = weak_image
             items['ulb_strong_image'] = strong_image
@@ -152,6 +152,6 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
             items['ulb_strong_mask'] = strong_text_tensors[2]
 
             items['idx_ulb'] = idx
-            items['sample_id'] = sample_id
+            items['x_ulb_id'] = sample_id
 
         return items

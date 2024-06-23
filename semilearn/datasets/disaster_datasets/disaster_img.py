@@ -90,10 +90,10 @@ class DisasterDatasetImage(Dataset):
         weak_image = self.get_weak_image(image)
 
         if not self.is_ulb:
-            return {'x_lb': weak_image, 'y_lb': target, 'sample_id': sample_id}
+            return {'x_lb': weak_image, 'y_lb': target, 'x_lb_id': sample_id}
         else:
             strong_image = self.get_strong_image(image)
-            return {'x_ulb_w': weak_image, 'x_ulb_s': strong_image, 'idx_ulb': idx, 'sample_id': sample_id}
+            return {'x_ulb_w': weak_image, 'x_ulb_s': strong_image, 'idx_ulb': idx, 'x_ulb_id': sample_id}
 
 
     def __len__(self):
