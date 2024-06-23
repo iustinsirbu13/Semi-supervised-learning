@@ -1,0 +1,47 @@
+algorithm: multihead_apm_mmbt_bert
+
+# optimization configs
+epoch: 20
+num_train_iter: 1000000 
+num_eval_iter: 1000000   
+num_log_iter: 1    
+optim: AdamW
+lr: 0.00001
+layer_decay: 0.5
+batch_size: 1
+eval_batch_size: 1
+
+# dataset configs
+dataset: disaster
+task: informative
+num_labels: 0
+crop_ratio: 0.875
+img_size: 224
+train_filename: train.jsonl
+dev_filename: dev.jsonl
+test_filename: test.jsonl
+unlabeled_filename: unlabeled.jsonl
+data_dir: C:\Users\popov\Desktop\licenta\datasets\demo\informative
+img_dir: C:\Users\popov\Desktop\licenta\datasets\demo\image
+weak_text_tag: eda_01 
+strong_text_tag: eda_02 
+
+# algorithm specific configs
+hard_label: True
+uratio: 3
+ulb_loss_ratio: 1.0
+use_agreement_apm: True
+apm_percentile: 0.05
+
+# device configs
+gpu: None
+world_size: 1
+num_workers: 2
+distributed: False
+
+# test configs
+resume: True
+save_dir: ./saved_models/informative/multihead_apm/eval
+save_name: multihead_apm_agree_5_no_low
+load_path: ./saved_models/informative/multihead_apm/train/multihead_apm_agree_5_no_low/model_best.pth
+eval_only: True

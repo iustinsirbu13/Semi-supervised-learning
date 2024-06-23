@@ -66,10 +66,12 @@ class SSLBaseWrapper:
         return x
     
     def prepare_dataloaders(self, config):
-        self.train_loader = get_data_loader(config, self.train_dataset, config.batch_size, data_sampler=None, shuffle=True)
-        self.dev_loader = get_data_loader(config, self.dev_dataset, config.eval_batch_size, data_sampler=None)
+        if not config.eval_only:
+            self.train_loader = get_data_loader(config, self.train_dataset, config.batch_size, data_sampler=None, shuffle=True)
+            self.dev_loader = get_data_loader(config, self.dev_dataset, config.eval_batch_size, data_sampler=None)
+            self.unlabeled_loader = get_data_loader(config, self.unlabeled_dataset, config.batch_size * config.uratio, data_sampler=None, shuffle=True)
+
         self.test_loader = get_data_loader(config, self.test_dataset, config.eval_batch_size, data_sampler=None)
-        self.unlabeled_loader = get_data_loader(config, self.unlabeled_dataset, config.batch_size * config.uratio, data_sampler=None, shuffle=True)
 
     def train(self, T=Trainer):
         trainer = T(self.config, self.algorithm)

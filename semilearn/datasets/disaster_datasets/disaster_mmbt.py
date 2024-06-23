@@ -87,7 +87,7 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
         return sentence, segment
         
     def sample(self, idx):
-        image, target = super().sample(idx)
+        image, target, sample_id = super().sample(idx)
 
         weak_text = self.data[idx][self.weak_text_tag]
         if self.weak_text_tag != 'text':
@@ -99,7 +99,7 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
             if self.strong_text_tag != 'text':
                 strong_text = random.choice(strong_text)
 
-        return image, target, weak_text, strong_text
+        return image, target, weak_text, strong_text, sample_id
 
     
     def get_sentence_segment_mask_tensor(self, sentence, segment):
@@ -117,7 +117,7 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
 
 
     def __getitem__(self, idx):
-        image, target, weak_text, strong_text = self.sample(idx)
+        image, target, weak_text, strong_text, sample_id = self.sample(idx)
 
         weak_image = self.get_weak_image(image)
         strong_image = self.get_strong_image(image)
@@ -136,6 +136,7 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
             items['lb_weak_mask'] = weak_text_tensors[2]
 
             items['lb_target'] = target
+            items['sample_id'] = sample_id
         else:
             items['ulb_weak_image'] = weak_image
             items['ulb_strong_image'] = strong_image
@@ -151,5 +152,6 @@ class DisasterDatasetMMBT(DisasterDatasetImage):
             items['ulb_strong_mask'] = strong_text_tensors[2]
 
             items['idx_ulb'] = idx
+            items['sample_id'] = sample_id
 
         return items

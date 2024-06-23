@@ -114,10 +114,19 @@ class Trainer:
             for data in data_loader:
                 logits = self.algorithm.get_logits(data, 'logits')
                 y = self.algorithm.get_targets(data)
+
+                y_true_list = y.cpu().tolist()
+                y_pred_list = torch.max(logits, dim=-1)[1].cpu().tolist()
+                y_logits_list = torch.softmax(logits, dim=-1).cpu().tolist()
                     
-                y_true.extend(y.cpu().tolist())
-                y_pred.extend(torch.max(logits, dim=-1)[1].cpu().tolist())
+                y_true.extend(y_true_list)
+                y_pred.extend(y_pred_list)
                 y_logits.append(torch.softmax(logits, dim=-1).cpu().numpy())
+
+                for i in range(len(y_true_list)):
+                    sample_id = data['sample_id'][i]
+                    self.logger.info(f"Sample[{sample_id}] --> Predicted class={y_true_list[i]}  Actual class={y_pred_list[i]}  Logits={y_logits_list[i]}")
+
         y_true = np.array(y_true)
         y_pred = np.array(y_pred)
         y_logits = np.concatenate(y_logits)
