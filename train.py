@@ -405,6 +405,6 @@ def main_worker(gpu, ngpus_per_node, args):
 
 if __name__ == "__main__":
     args = get_config()
-    port = get_port()
-    args.dist_url = "tcp://127.0.0.1:" + str(port)
+    # port = get_port()
+    # args.dist_url = "tcp://127.0.0.1:" + str(port)
     main(args)
