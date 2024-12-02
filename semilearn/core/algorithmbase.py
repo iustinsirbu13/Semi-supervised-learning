@@ -354,7 +354,7 @@ class AlgorithmBase:
         y_pred = np.array(y_pred)
         y_logits = np.concatenate(y_logits)
         top1 = accuracy_score(y_true, y_pred)
-        top5 = top_k_accuracy_score(y_true, y_probs, k=5)
+        top5 = top_k_accuracy_score(y_true, y_probs, k=5) if self.num_classes > 2 else 1.0
         balanced_top1 = balanced_accuracy_score(y_true, y_pred)
         precision = precision_score(y_true, y_pred, average='macro')
         recall = recall_score(y_true, y_pred, average='macro')
