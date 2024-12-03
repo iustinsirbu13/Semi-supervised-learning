@@ -68,6 +68,7 @@ def get_config():
         "--num_eval_iter", type=int, default=10, help="evaluation frequency"
     )
     parser.add_argument("--num_log_iter", type=int, default=5, help="logging frequency")
+    parser.add_argument("--num_log_decimals", type=int, default=4, help="number of decimals used for logging")
     parser.add_argument("-nl", "--num_labels", type=int, default=400)
     parser.add_argument("-bsz", "--batch_size", type=int, default=8)
     parser.add_argument(
