@@ -66,6 +66,7 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
     '''
     dump_dir = os.path.join(base_dir, 'data', args.dataset, 'labeled_idx')
     os.makedirs(dump_dir, exist_ok=True)
+    os.chmod(dump_dir, 0o777)
     lb_dump_path = os.path.join(dump_dir, f'lb_labels{args.num_labels}_{args.lb_imb_ratio}_seed{args.seed}_idx.npy')
     ulb_dump_path = os.path.join(dump_dir, f'ulb_labels{args.num_labels}_{args.ulb_imb_ratio}_seed{args.seed}_idx.npy')
 
