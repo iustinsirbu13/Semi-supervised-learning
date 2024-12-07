@@ -34,6 +34,7 @@ class EvaluationHook(Hook):
             best_model_path = os.path.join(algorithm.args.save_dir, algorithm.args.save_name, 'model_best.pth')
             algorithm.load_model(best_model_path)
             test_dict = algorithm.evaluate('test')
+            algorithm.print_fn(f'test_dict: {test_dict}')
             results_dict['test/best_acc'] = test_dict['test/top-1-acc']
         algorithm.results_dict = results_dict
         
