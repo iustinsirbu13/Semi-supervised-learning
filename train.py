@@ -62,6 +62,12 @@ def get_config():
         help="total number of training iterations",
     )
     parser.add_argument(
+    "--early_stopping_iter",
+    type=int,
+    default=None,
+    help="maximum number of training iterations without improvement, before stopping training",
+    )
+    parser.add_argument(
         "--num_warmup_iter", type=int, default=0, help="cosine linear warmup iterations"
     )
     parser.add_argument(

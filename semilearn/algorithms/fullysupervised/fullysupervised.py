@@ -40,12 +40,12 @@ class FullySupervised(AlgorithmBase):
         # lb: labeled, ulb: unlabeled
         self.model.train()
         self.call_hook("before_run")
-            
+
         for epoch in range(self.start_epoch, self.epochs):
             self.epoch = epoch
             
             # prevent the training iterations exceed args.num_train_iter
-            if self.it > self.num_train_iter:
+            if self.it >= self.num_train_iter or self._reached_early_stopping():
                 break
 
             self.call_hook("before_train_epoch")
@@ -53,7 +53,7 @@ class FullySupervised(AlgorithmBase):
             for data_lb in self.loader_dict['train_lb']:
 
                 # prevent the training iterations exceed args.num_train_iter
-                if self.it > self.num_train_iter:
+                if self.it >= self.num_train_iter or self._reached_early_stopping():
                     break
 
                 self.call_hook("before_train_step")

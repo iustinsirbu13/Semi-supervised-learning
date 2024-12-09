@@ -281,6 +281,11 @@ class AlgorithmBase:
         # return log_dict
         raise NotImplementedError
 
+    def _reached_early_stopping(self):
+        if self.args.early_stopping_iter and (self.it - self.best_it >= self.args.early_stopping_iter):
+            self.print_fn(f'Reached early stopping with it {self.it}, best_it {self.best_it}, early_stopping_iter {self.args.early_stopping_iter}')
+            return True
+        return False
 
     def train(self):
         """
@@ -293,7 +298,7 @@ class AlgorithmBase:
             self.epoch = epoch
             
             # prevent the training iterations exceed args.num_train_iter
-            if self.it >= self.num_train_iter:
+            if self.it >= self.num_train_iter or self._reached_early_stopping():
                 break
             
             self.call_hook("before_train_epoch")
@@ -301,7 +306,7 @@ class AlgorithmBase:
             for data_lb, data_ulb in zip(self.loader_dict['train_lb'],
                                          self.loader_dict['train_ulb']):
                 # prevent the training iterations exceed args.num_train_iter
-                if self.it >= self.num_train_iter:
+                if self.it >= self.num_train_iter or self._reached_early_stopping():
                     break
 
                 self.call_hook("before_train_step")
