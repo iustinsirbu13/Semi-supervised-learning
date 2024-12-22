@@ -2,11 +2,12 @@
 # Licensed under the MIT License.
 
 import os
+import json
 import contextlib
 import numpy as np
 from inspect import signature
 from collections import OrderedDict
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, top_k_accuracy_score
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, top_k_accuracy_score, classification_report
 
 import torch
 import torch.nn.functional as F
@@ -115,12 +116,14 @@ class AlgorithmBase:
         """
         if self.rank != 0 and self.distributed:
             torch.distributed.barrier()
+
         dataset_dict = get_dataset(self.args, self.algorithm, self.args.dataset, self.args.num_labels, self.args.num_classes, self.args.data_dir, self.args.include_lb_to_ulb)
         if dataset_dict is None:
             return dataset_dict
 
         self.args.ulb_dest_len = len(dataset_dict['train_ulb']) if dataset_dict['train_ulb'] is not None else 0
         self.args.lb_dest_len = len(dataset_dict['train_lb'])
+    
         self.print_fn("unlabeled data number: {}, labeled data number {}".format(self.args.ulb_dest_len, self.args.lb_dest_len))
         if self.rank == 0 and self.distributed:
             torch.distributed.barrier()
@@ -370,8 +373,24 @@ class AlgorithmBase:
         self.ema.restore()
         self.model.train()
 
-        eval_dict = {eval_dest+'/loss': total_loss / total_num, eval_dest+'/top-1-acc': top1, eval_dest+'/top-5-acc': top5, 
-                     eval_dest+'/balanced_acc': balanced_top1, eval_dest+'/precision': precision, eval_dest+'/recall': recall, eval_dest+'/F1': F1}
+        report_per_class = classification_report(y_true, y_pred, output_dict=True)
+
+        eval_dict = {
+            eval_dest+'/loss': total_loss / total_num, 
+            eval_dest+'/top-1-acc': top1, 
+            eval_dest+'/top-5-acc': top5, 
+            eval_dest+'/balanced_acc': balanced_top1, 
+            eval_dest+'/precision': precision, 
+            eval_dest+'/recall': recall, 
+            eval_dest+'/F1': F1,
+            eval_dest + '/precision-0' : report_per_class['0']['precision'],
+            eval_dest + '/recall-0' : report_per_class['0']['recall'],
+            eval_dest + '/F1-0' : report_per_class['0']['f1-score'],
+            eval_dest + '/precision-1' : report_per_class['1']['precision'],
+            eval_dest + '/recall-1' : report_per_class['1']['recall'],
+            eval_dest + '/F1-1' : report_per_class['1']['f1-score']
+        }
+
         if return_logits:
             eval_dict[eval_dest+'/logits'] = y_logits
         return eval_dict

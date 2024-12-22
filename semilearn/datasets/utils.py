@@ -48,7 +48,7 @@ def split_ssl_data(args, data, targets, num_classes,
 
     if include_lb_to_ulb:
         ulb_idx = np.concatenate([lb_idx, ulb_idx], axis=0)
-    
+
     return data[lb_idx], targets[lb_idx], data[ulb_idx], targets[ulb_idx]
 
 
@@ -64,7 +64,8 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
     samples for labeled data
     (sampling with balanced ratio over classes)
     '''
-    dump_dir = os.path.join(base_dir, 'data', args.dataset, 'labeled_idx')
+    dump_dir = os.path.join(".", 'data', args.dataset, 'labeled_idx')
+    print(dump_dir)
     os.makedirs(dump_dir, exist_ok=True)
     os.chmod(dump_dir, 0o777)
     lb_dump_path = os.path.join(dump_dir, f'lb_labels{args.num_labels}_{args.lb_imb_ratio}_seed{args.seed}_idx.npy')
@@ -100,7 +101,16 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
 
     lb_idx = []
     ulb_idx = []
-    
+
+    # #TODO make this smarter
+    # if num_classes == 2:
+    #     idx0 = np.where(target == 0)[0]
+    #     idx1 = np.where(target == 1)[0]
+    #     if lb_samples_per_class[0] > len(idx0):
+    #         lb_samples_per_class[1] += lb_samples_per_class[0] - len(idx0)
+    #     elif lb_samples_per_class[1] > len(idx1):
+    #         lb_samples_per_class[0] += lb_samples_per_class[1] - len(idx1)
+
     for c in range(num_classes):
         idx = np.where(target == c)[0]
         np.random.shuffle(idx)
@@ -117,7 +127,7 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
 
     np.save(lb_dump_path, lb_idx)
     np.save(ulb_dump_path, ulb_idx)
-    
+
     return lb_idx, ulb_idx
 
 
@@ -150,6 +160,9 @@ def get_collactor(args, net):
     elif net == 'hubert_base':
         from semilearn.datasets.collactors import get_hubert_base_collactor
         collact_fn = get_hubert_base_collactor(args.max_length_seconds, args.sample_rate)
+    elif net == 'longformer_base':
+        from semilearn.datasets.collactors import get_longformer_base_collactor
+        collact_fn = get_longformer_base_collactor(args.max_length)
     else:
         collact_fn = None
     return collact_fn

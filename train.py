@@ -266,7 +266,7 @@ def main(args):
     For (Distributed)DataParallelism,
     main(args) spawn each process (main_worker) to each GPU.
     """
-
+    
     assert (
         args.num_train_iter % args.epoch == 0
     ), f"# total training iter. {args.num_train_iter} is not divisible by # epochs {args.epoch}"  # noqa: E501

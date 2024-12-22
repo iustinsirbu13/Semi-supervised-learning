@@ -71,7 +71,6 @@ def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./d
         include_lb_to_ulb: flag of including labeled data into unlabeled data
     """
     from semilearn.datasets import get_eurosat, get_medmnist, get_semi_aves, get_cifar, get_svhn, get_stl10, get_imagenet, get_json_dset, get_pkl_dset
-
     if dataset == "eurosat":
         lb_dset, ulb_dset, eval_dset = get_eurosat(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
         test_dset = None
@@ -99,7 +98,7 @@ def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./d
     # speech dataset
     elif dataset in ['esc50', 'fsdnoisy', 'gtzan', 'superbks', 'superbsi', 'urbansound8k']:
         lb_dset, ulb_dset, eval_dset, test_dset = get_pkl_dset(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
-    elif dataset in ['aclImdb', 'ag_news', 'amazon_review', 'dbpedia', 'yahoo_answers', 'yelp_review', 'wildguardmix_PH']:
+    elif dataset in ['aclImdb', 'ag_news', 'amazon_review', 'dbpedia', 'yahoo_answers', 'yelp_review', 'wildguardmix_PH', 'OAIMod_PH', 'XSTest_PH', 'OAIMod_PH_NN', 'wildguardmix_RH', 'XSTest_RH']:
         lb_dset, ulb_dset, eval_dset, test_dset = get_json_dset(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
     else:
         return None
