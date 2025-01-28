@@ -87,30 +87,57 @@ class MultiheadAPM(AlgorithmBase):
 
         return F.cross_entropy(ulb_strong_logits[head_id][mask == 1], multihead_labels[mask == 1])
 
+    def get_head_unsupervised_loss_v2(self, ulb_weak_logits, ulb_strong_logits, pseudo_labels, idx_ulb, head_id):
+        '''
+        This works only for 3 heads
+        '''
+        if head_id == 0:
+            head_id1, head_id2 = 1, 2
+        elif head_id == 1:
+            head_id1, head_id2 = 0, 2
+        else:
+            head_id1, head_id2 = 0, 1
+
+        num_ulb = idx_ulb.shape[0]
+        multihead_labels = torch.ones(num_ulb, dtype=torch.int64).to(self.args.device) * -1
+        multihead_agreement_types = torch.ones(num_ulb, dtype=torch.int64).to(self.args.device) * -1
+        agreement_types_mask = torch.ones(num_ulb, dtype=torch.int64).to(self.args.device) * -1
+
+        for i in range(num_ulb):
+            label1 = pseudo_labels[head_id1][i]
+            label2 = pseudo_labels[head_id2][i]
+            multihead_labels[i], multihead_agreement_types[i], agreement_types_mask[i] = self.call_hook(
+                "get_apm_label_v2", "APMHook", head_id=head_id, head_id1=head_id1, head_id2=head_id2, idx=idx_ulb[i], label1=label1, label2=label2)
+        
+        if self.args.apm_disagreement_weight == -1:
+            # legacy code
+            mask = multihead_labels != -1
+            if 1 not in mask:
+                return torch.tensor(0).to(self.args.device)
+            return F.cross_entropy(ulb_strong_logits[head_id][mask == 1], multihead_labels[mask == 1])
+        else:
+            if 0 in agreement_types_mask:
+                ce_disagreement = F.cross_entropy(ulb_strong_logits[head_id][agreement_types_mask == 0], multihead_labels[agreement_types_mask == 0]) 
+            else:
+                ce_disagreement = torch.tensor(0).to(self.args.device)
+            if 1 in agreement_types_mask:
+                ce_agreement = F.cross_entropy(ulb_strong_logits[head_id][agreement_types_mask == 1], multihead_labels[agreement_types_mask == 1]) 
+            else:
+                ce_agreement = torch.tensor(0).to(self.args.device)
+            return self.args.apm_disagreement_weight * ce_disagreement + (1 - self.args.apm_disagreement_weight) * ce_agreement
 
     def get_unsupervised_loss(self, ulb_weak_logits, ulb_strong_logits, pseudo_labels, idx_ulb):
         for head_id in range(self.num_heads):
             self.call_hook("update", "APMHook", logits_x_ulb_w=ulb_weak_logits[head_id], logits_x_ulb_s=ulb_strong_logits[head_id], idx_ulb=idx_ulb, head_id=head_id)
         
-        head_losses = [self.get_head_unsupervised_loss(ulb_weak_logits, ulb_strong_logits, pseudo_labels, idx_ulb, head_id) for head_id in range(self.num_heads)]
+        head_losses = [self.get_head_unsupervised_loss_v2(ulb_weak_logits, ulb_strong_logits, pseudo_labels, idx_ulb, head_id) for head_id in range(self.num_heads)]
         return sum(head_losses) / self.num_heads
     
     def get_loss(self, lb_loss, ulb_loss):
         return lb_loss + self.lambda_u * ulb_loss
     
-    def train_step_base(self, logits, y_lb, idx_ulb):
-        num_lb = y_lb.shape[0]
-        num_ulb = idx_ulb.shape[0]
-
-        logits_x_lb = torch.zeros(self.num_heads, num_lb, self.num_classes).to(self.args.device)
-        logits_x_ulb_w = torch.zeros(self.num_heads, num_ulb, self.num_classes).to(self.args.device)
-        logits_x_ulb_s = torch.zeros(self.num_heads, num_ulb, self.num_classes).to(self.args.device)
-
-        for head_id in range(self.num_heads):
-            logits_x_lb[head_id], logits_x_ulb_w[head_id], logits_x_ulb_s[head_id] = \
-                self.get_head_logits(head_id, logits, num_lb)
-            
-        # Supervised loss
+    def _post_process_logits(self, logits_x_lb, logits_x_ulb_w, logits_x_ulb_s, y_lb, idx_ulb):
+         # Supervised loss
         lb_loss = self.get_supervised_loss(logits_x_lb, y_lb)
 
         # Pseudo labels   
@@ -129,16 +156,45 @@ class MultiheadAPM(AlgorithmBase):
         
         return out_dict, log_dict
 
+    def train_step_base(self, logits, y_lb, idx_ulb):
+        num_lb = y_lb.shape[0]
+        num_ulb = idx_ulb.shape[0]
+
+        logits_x_lb = torch.zeros(self.num_heads, num_lb, self.num_classes).to(self.args.device)
+        logits_x_ulb_w = torch.zeros(self.num_heads, num_ulb, self.num_classes).to(self.args.device)
+        logits_x_ulb_s = torch.zeros(self.num_heads, num_ulb, self.num_classes).to(self.args.device)
+
+        for head_id in range(self.num_heads):
+            logits_x_lb[head_id], logits_x_ulb_w[head_id], logits_x_ulb_s[head_id] = \
+                self.get_head_logits(head_id, logits, num_lb)
+
+        return self._post_process_logits(logits_x_lb, logits_x_ulb_w, logits_x_ulb_s, y_lb, idx_ulb)
+
 
     # @overrides
     def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s, idx_ulb):       
         idx_ulb = idx_ulb.to(self.args.device)
 
-        inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s))
-        inputs = inputs.to(self.args.device)
-        logits = self.model(inputs)['logits']
-
-        return self.train_step_base(logits, y_lb, idx_ulb)
+        if self.use_cat:
+            inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s))
+            inputs = inputs.to(self.args.device)
+            logits = self.model(inputs)['logits']
+            return self.train_step_base(logits, y_lb, idx_ulb)
+        else:
+            # # for var in [x_lb, x_ulb_w, x_ulb_s]:
+            # #     for k, v in var.items():
+            # #         v.to(self.args.device)
+            # # y_lb = y_lb.to(self.args.device)
+            # print('input device', x_lb['input_ids'].get_device(), x_lb['attention_mask'].get_device())
+            # print('output_device', y_lb.get_device())
+            # print('device', self.args.device)
+            # print(x_lb['input_ids'].shape, y_lb.shape, x_ulb_w['input_ids'].shape)
+            logits_x_lb = self.model(x_lb)['logits']
+            logits_x_ulb_s = self.model(x_ulb_s)['logits']
+            with torch.no_grad():
+                logits_x_ulb_w = self.model(x_ulb_w)['logits']
+            # print(logits_x_lb.shape, logits_x_ulb_w.shape, logits_x_ulb_s.shape)
+            return self._post_process_logits(logits_x_lb, logits_x_ulb_w, logits_x_ulb_s, y_lb, idx_ulb)
     
     # @overrides
     def get_logits(self, data, out_key):
@@ -158,5 +214,8 @@ class MultiheadAPM(AlgorithmBase):
         return [
             SSL_Argument('--use_debug', str2bool, False),
             SSL_Argument('--num_heads', int, 3),
-            SSL_Argument('--smoothness', float, 0.997)
+            SSL_Argument('--smoothness', float, 0.997),
+            SSL_Argument('--no_low', str2bool, False),
+            SSL_Argument('--apm_disagreement_weight', float, -1), # in [0, 1] if set
+            SSL_Argument('--adjust_clf_size', str2bool, False),
         ]

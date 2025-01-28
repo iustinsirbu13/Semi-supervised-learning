@@ -33,4 +33,5 @@ class APMLogHook(Hook):
             # APM class thresholds for current head
             algorithm.print_fn(f"HEAD[{head_id}]: APM class thresholds={hook.apm_cutoff[head_id]}")
 
-
+            # Agreement types
+            algorithm.print_fn(f"HEAD[{head_id}]: APM Agreement Types={torch.bincount(hook.agreement_types[head_id])}")
