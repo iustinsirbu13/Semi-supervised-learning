@@ -69,7 +69,19 @@ class DataCollatorWithPadding:
         )
         
         if 'label' in batch:
-            return {'idx_lb': batch['idx'], 'x_lb': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, 'y_lb': batch['label']}
+            if len(s_features)==0:
+                return {'idx_lb': batch['idx'], 'x_lb': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, 'y_lb': batch['label']}
+            else:
+                s_batch = self.tokenizer.pad(
+                    s_features,
+                    padding=True,
+                    max_length=None,
+                    pad_to_multiple_of=self.pad_to_multiple_of,
+                    return_tensors=self.return_tensors,
+                )
+                return {'idx_lb': batch['idx'], 'x_lb': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, 
+                                                'x_lb_s': {'input_ids': s_batch['input_ids'], 'attention_mask': s_batch['attention_mask']}, 
+                                                'y_lb': batch['label']}
         else:
             if len(s_features) > 0:
                 s_batch = self.tokenizer.pad(
@@ -90,12 +102,13 @@ class DataCollatorWithPadding:
                     return {'idx_ulb': batch['idx'], 
                             'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, \
                             'x_ulb_s_0': {'input_ids': s_batch['input_ids'], 'attention_mask': s_batch['attention_mask']}, \
-                            'x_ulb_s_1': {'input_ids': s_batch_['input_ids'], 'attention_mask': s_batch_['attention_mask']}
+                            'x_ulb_s_1': {'input_ids': s_batch_['input_ids'], 'attention_mask': s_batch_['attention_mask']},
+                            'y_ulb': batch['ulb_label']
                         }
                 else:
-                    return {'idx_ulb': batch['idx'], 'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, 'x_ulb_s': {'input_ids': s_batch['input_ids'], 'attention_mask': s_batch['attention_mask']}}
+                    return {'idx_ulb': batch['idx'], 'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, 'x_ulb_s': {'input_ids': s_batch['input_ids'], 'attention_mask': s_batch['attention_mask']}, 'y_ulb': batch['ulb_label']}
             else:
-                return {'idx_ulb': batch['idx'], 'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}}
+                return {'idx_ulb': batch['idx'], 'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, 'y_ulb': batch['ulb_label']}
 
 
 def get_bert_base_uncased_collactor(max_length=512):

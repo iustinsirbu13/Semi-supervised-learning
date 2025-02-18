@@ -52,10 +52,6 @@ def split_ssl_data(args, data, targets, num_classes,
     return data[lb_idx], targets[lb_idx], data[ulb_idx], targets[ulb_idx]
 
 
-def sample_labeled_data():
-    pass
-
-
 def sample_labeled_unlabeled_data(args, data, target, num_classes,
                                   lb_num_labels, ulb_num_labels=None,
                                   lb_imbalance_ratio=1.0, ulb_imbalance_ratio=1.0,
@@ -80,6 +76,11 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
         # balanced setting, lb_num_labels is total number of labels for labeled data
         assert lb_num_labels % num_classes == 0, "lb_num_labels must be dividable by num_classes in balanced setting"
         lb_samples_per_class = [int(lb_num_labels / num_classes)] * num_classes
+    elif lb_imbalance_ratio == 0.0:
+        # sample lb_num_labels samples, stratified by the targets
+        lb_samples_per_class = make_stratified_data(lb_num_labels, num_classes, target)
+        # use the rest of the data as unlabeled
+        assert ulb_num_labels is None and ulb_imbalance_ratio == 1.0
     else:
         # imbalanced setting, lb_num_labels is the maximum number of labels for class 1
         lb_samples_per_class = make_imbalance_data(lb_num_labels, num_classes, lb_imbalance_ratio)
@@ -88,7 +89,7 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
     if ulb_imbalance_ratio == 1.0:
         # balanced setting
         if ulb_num_labels is None or ulb_num_labels == 'None':
-            pass # ulb_samples_per_class = [int(len(data) / num_classes) - lb_samples_per_class[c] for c in range(num_classes)] # [int(len(data) / num_classes) - int(lb_num_labels / num_classes)] * num_classes
+            ulb_samples_per_class = None
         else:
             assert ulb_num_labels % num_classes == 0, "ulb_num_labels must be dividable by num_classes in balanced setting"
             ulb_samples_per_class = [int(ulb_num_labels / num_classes)] * num_classes
@@ -104,13 +105,14 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
         idx = np.where(target == c)[0]
         np.random.shuffle(idx)
         lb_idx.extend(idx[:lb_samples_per_class[c]])
-        if ulb_num_labels is None or ulb_num_labels == 'None':
+        if ulb_samples_per_class is None:
             ulb_idx.extend(idx[lb_samples_per_class[c]:])
         else:
             ulb_idx.extend(idx[lb_samples_per_class[c]:lb_samples_per_class[c]+ulb_samples_per_class[c]])
     
     if isinstance(lb_idx, list):
         lb_idx = np.asarray(lb_idx)
+        print('LABELED_INDEX:', lb_idx)
     if isinstance(ulb_idx, list):
         ulb_idx = np.asarray(ulb_idx)
 
@@ -118,6 +120,13 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
     np.save(ulb_dump_path, ulb_idx)
     
     return lb_idx, ulb_idx
+
+def make_stratified_data(total_num_labels, num_classes, targets):
+    values, counts = np.unique(targets, return_counts=True)
+    assert len(counts) == num_classes, 'Case when a class is missing is not treated'
+    counts_normalized = counts / counts.sum()
+    samples_per_class = np.rint(counts_normalized * total_num_labels).astype(int)
+    return samples_per_class.tolist()
 
 
 def make_imbalance_data(max_num_labels, num_classes, gamma):
@@ -137,10 +146,10 @@ def make_imbalance_data(max_num_labels, num_classes, gamma):
 
 
 def get_collactor(args, net):
-    if net == 'bert_base_uncased':
+    if net in ['bert_base_uncased', 'bert_base_uncased_multihead']:
         from semilearn.datasets.collactors import get_bert_base_uncased_collactor
         collact_fn = get_bert_base_uncased_collactor(args.max_length)
-    elif net == 'bert_base_cased':
+    elif net in ['bert_base_cased', 'bert_base_cased_multihead']:
         from semilearn.datasets.collactors import get_bert_base_cased_collactor
         collact_fn = get_bert_base_cased_collactor(args.max_length)
     elif net == 'wave2vecv2_base':
