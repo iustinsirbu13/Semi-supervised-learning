@@ -94,10 +94,14 @@ class ABC(ImbAlgorithmBase):
             feats_x_ulb_s = feats_x_ulb_s[0]
         
         # get logits
-        logits_x_lb = self.model.module.aux_classifier(feats_x_lb)
-        logits_x_ulb_s = self.model.module.aux_classifier(feats_x_ulb_s)
+        # logits_x_lb = self.model.module.aux_classifier(feats_x_lb)
+        # logits_x_ulb_s = self.model.module.aux_classifier(feats_x_ulb_s)
+        # with torch.no_grad():
+        #     logits_x_ulb_w = self.model.module.aux_classifier(feats_x_ulb_w)
+        logits_x_lb = self.model.aux_classifier(feats_x_lb)
+        logits_x_ulb_s = self.model.aux_classifier(feats_x_ulb_s)
         with torch.no_grad():
-            logits_x_ulb_w = self.model.module.aux_classifier(feats_x_ulb_w)
+            logits_x_ulb_w = self.model.aux_classifier(feats_x_ulb_w)
 
         # compute abc loss using logits_aux from dict
         abc_loss = self.compute_abc_loss(
@@ -154,3 +158,12 @@ class ABC(ImbAlgorithmBase):
             SSL_Argument('--abc_p_cutoff', float, 0.95),
             SSL_Argument('--abc_loss_ratio', float, 1.0),
         ]        
+
+    def get_logits(self, data, out_key):
+        x = data['x_lb']
+        if isinstance(x, dict):
+            x = {k: v.to(self.args.device) for k, v in x.items()}
+        else:
+            x = x.to(self.args.device)
+
+        return self.model(x)[out_key]

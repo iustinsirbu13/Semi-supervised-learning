@@ -83,6 +83,7 @@ class DataCollatorWithPadding:
                                                 'x_lb_s': {'input_ids': s_batch['input_ids'], 'attention_mask': s_batch['attention_mask']}, 
                                                 'y_lb': batch['label']}
         else:
+            ulb_label_dict = {'y_ulb': batch['ulb_label']} if 'ulb_label' in batch else {}
             if len(s_features) > 0:
                 s_batch = self.tokenizer.pad(
                     s_features,
@@ -102,12 +103,13 @@ class DataCollatorWithPadding:
                     return {'idx_ulb': batch['idx'], 
                             'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, \
                             'x_ulb_s_0': {'input_ids': s_batch['input_ids'], 'attention_mask': s_batch['attention_mask']}, \
-                            'x_ulb_s_1': {'input_ids': s_batch_['input_ids'], 'attention_mask': s_batch_['attention_mask']}
+                            'x_ulb_s_1': {'input_ids': s_batch_['input_ids'], 'attention_mask': s_batch_['attention_mask']},
+                            'y_ulb': batch['ulb_label']
                         }
                 else:
-                    return {'idx_ulb': batch['idx'], 'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, 'x_ulb_s': {'input_ids': s_batch['input_ids'], 'attention_mask': s_batch['attention_mask']}}
+                    return {'idx_ulb': batch['idx'], 'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, 'x_ulb_s': {'input_ids': s_batch['input_ids'], 'attention_mask': s_batch['attention_mask']}, 'y_ulb': batch['ulb_label']}
             else:
-                return {'idx_ulb': batch['idx'], 'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}}
+                return {'idx_ulb': batch['idx'], 'x_ulb_w': {'input_ids': batch['input_ids'], 'attention_mask': batch['attention_mask']}, 'y_ulb': batch['ulb_label']}
 
 
 def get_bert_base_uncased_collactor(max_length=512):

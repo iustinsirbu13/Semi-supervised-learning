@@ -33,7 +33,7 @@ class Hook:
         return (algorithm.it + 1) % n == 0 if n > 0 else False
 
     def end_of_epoch(self, algorithm):
-        return algorithm.it + 1 % len(algorithm.data_loader['train_lb']) == 0
+        return (algorithm.it + 1) % len(algorithm.loader_dict['train_lb']) == 0
 
     def is_last_epoch(self, algorithm):
         return algorithm.epoch + 1 == algorithm.epochs

@@ -73,19 +73,34 @@ class FixMatchMultihead(FixMatchBase):
     # @overrides
     def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s):
         num_lb = y_lb.shape[0]
-        num_ulb = x_ulb_w.shape[0]
-       
-        inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s))
-        inputs = inputs.to(self.args.device)
-        logits = self.model(inputs)['logits']
-        
-        logits_x_lb = torch.zeros(self.num_heads, num_lb, self.num_classes).to(self.args.device)
-        logits_x_ulb_w = torch.zeros(self.num_heads, num_ulb, self.num_classes).to(self.args.device)
-        logits_x_ulb_s = torch.zeros(self.num_heads, num_ulb, self.num_classes).to(self.args.device)
 
-        for head_id in range(self.num_heads):
-            logits_x_lb[head_id], logits_x_ulb_w[head_id], logits_x_ulb_s[head_id] = \
-                self.get_head_logits(head_id, logits, num_lb)
+        if self.use_cat:
+            num_ulb = x_ulb_w.shape[0]
+        
+            inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s))
+            inputs = inputs.to(self.args.device)
+            logits = self.model(inputs)['logits']
+            
+            logits_x_lb = torch.zeros(self.num_heads, num_lb, self.num_classes).to(self.args.device)
+            logits_x_ulb_w = torch.zeros(self.num_heads, num_ulb, self.num_classes).to(self.args.device)
+            logits_x_ulb_s = torch.zeros(self.num_heads, num_ulb, self.num_classes).to(self.args.device)
+
+            for head_id in range(self.num_heads):
+                logits_x_lb[head_id], logits_x_ulb_w[head_id], logits_x_ulb_s[head_id] = \
+                    self.get_head_logits(head_id, logits, num_lb)
+            feat_dict = None
+        else:
+            outs_x_lb = self.model(x_lb)
+            logits_x_lb = outs_x_lb['logits']
+            feats_x_lb = outs_x_lb['feat']
+            outs_x_ulb_s = self.model(x_ulb_s)
+            logits_x_ulb_s = outs_x_ulb_s['logits']
+            feats_x_ulb_s = outs_x_ulb_s['feat']
+            with torch.no_grad():
+                outs_x_ulb_w = self.model(x_ulb_w)
+                logits_x_ulb_w = outs_x_ulb_w['logits']
+                feats_x_ulb_w = outs_x_ulb_w['feat']
+            feat_dict = {'x_lb':feats_x_lb, 'x_ulb_w':feats_x_ulb_w, 'x_ulb_s':feats_x_ulb_s}
 
         # Supervised loss
         lb_loss = self.get_supervised_loss(logits_x_lb, y_lb)
@@ -100,7 +115,10 @@ class FixMatchMultihead(FixMatchBase):
         # Total loss
         loss = self.get_loss(lb_loss, ulb_loss)
 
-        out_dict = self.process_out_dict(loss=loss)
+        if feat_dict:
+            out_dict = self.process_out_dict(loss=loss, feat=feat_dict)
+        else:
+            out_dict = self.process_out_dict(loss=loss)
         log_dict = self.process_log_dict(sup_loss=lb_loss.item(), 
                                          unsup_loss=ulb_loss.item(), 
                                          total_loss=loss.item())

@@ -3,6 +3,7 @@ import torch.nn.functional as F
 
 from semilearn.algorithms.utils import SSL_Argument, str2bool
 from semilearn.algorithms.disaster.multihead_apm.apm_hook import APMHook
+from semilearn.algorithms.disaster.multihead_apm.apm_hook_v3 import APMHook as APMHookV3
 from semilearn.algorithms.disaster.multihead_apm.apm_log_hook import APMLogHook
 from semilearn.algorithms.disaster.multihead_apm.debug_hook import DebugHook
 from semilearn.core.algorithmbase import AlgorithmBase
@@ -39,8 +40,13 @@ class MultiheadAPM(AlgorithmBase):
 
     # @overrides
     def set_hooks(self):
-        self.register_hook(APMHook(self.args, APMLogHook()), "APMHook")
-        
+        if self.args.multihead_apm_variant == 'original':
+            self.register_hook(APMHook(self.args, APMLogHook()), "APMHook")
+        elif self.args.multihead_apm_variant in ['v3', 'v4', 'v5', 'v6']:
+            self.register_hook(APMHookV3(self.args, APMLogHook()), "APMHook")
+        else:
+            raise ValueError(f'{self.args.multihead_apm_variant} is not valid.')
+
         if self.use_debug:
             self.register_hook(DebugHook(), "DebugHook")
 
@@ -109,6 +115,11 @@ class MultiheadAPM(AlgorithmBase):
             multihead_labels[i], multihead_agreement_types[i], agreement_types_mask[i] = self.call_hook(
                 "get_apm_label_v2", "APMHook", head_id=head_id, head_id1=head_id1, head_id2=head_id2, idx=idx_ulb[i], label1=label1, label2=label2)
         
+        if self.args.multihead_apm_variant in ['v4', 'v5', 'v6']:
+            multihead_labels[multihead_labels == -1] = 0 # can't have labels -1, even though the weight will be 0
+            samples_weights = (agreement_types_mask == 0) * self.args.apm_disagreement_weight + (agreement_types_mask == 1) * 1
+            return (F.cross_entropy(ulb_strong_logits[head_id], multihead_labels, reduction='none') * samples_weights).mean()
+
         if self.args.apm_disagreement_weight == -1:
             # legacy code
             mask = multihead_labels != -1
@@ -136,7 +147,7 @@ class MultiheadAPM(AlgorithmBase):
     def get_loss(self, lb_loss, ulb_loss):
         return lb_loss + self.lambda_u * ulb_loss
     
-    def _post_process_logits(self, logits_x_lb, logits_x_ulb_w, logits_x_ulb_s, y_lb, idx_ulb):
+    def _post_process_logits(self, logits_x_lb, logits_x_ulb_w, logits_x_ulb_s, y_lb, idx_ulb, feat_dict=None):
          # Supervised loss
         lb_loss = self.get_supervised_loss(logits_x_lb, y_lb)
 
@@ -149,7 +160,10 @@ class MultiheadAPM(AlgorithmBase):
         # Total loss
         loss = self.get_loss(lb_loss, ulb_loss)
 
-        out_dict = self.process_out_dict(loss=loss)
+        if feat_dict:
+            out_dict = self.process_out_dict(loss=loss, feat=feat_dict)
+        else:
+            out_dict = self.process_out_dict(loss=loss)
         log_dict = self.process_log_dict(sup_loss=lb_loss.item(), 
                                          unsup_loss=ulb_loss.item(), 
                                          total_loss=loss.item())
@@ -189,12 +203,24 @@ class MultiheadAPM(AlgorithmBase):
             # print('output_device', y_lb.get_device())
             # print('device', self.args.device)
             # print(x_lb['input_ids'].shape, y_lb.shape, x_ulb_w['input_ids'].shape)
-            logits_x_lb = self.model(x_lb)['logits']
-            logits_x_ulb_s = self.model(x_ulb_s)['logits']
-            with torch.no_grad():
-                logits_x_ulb_w = self.model(x_ulb_w)['logits']
+            # logits_x_lb = self.model(x_lb)['logits']
+            # logits_x_ulb_s = self.model(x_ulb_s)['logits']
+            # with torch.no_grad():
+            #     logits_x_ulb_w = self.model(x_ulb_w)['logits']
             # print(logits_x_lb.shape, logits_x_ulb_w.shape, logits_x_ulb_s.shape)
-            return self._post_process_logits(logits_x_lb, logits_x_ulb_w, logits_x_ulb_s, y_lb, idx_ulb)
+            outs_x_lb = self.model(x_lb)
+            logits_x_lb = outs_x_lb['logits']
+            feats_x_lb = outs_x_lb['feat']
+            outs_x_ulb_s = self.model(x_ulb_s)
+            logits_x_ulb_s = outs_x_ulb_s['logits']
+            feats_x_ulb_s = outs_x_ulb_s['feat']
+            with torch.no_grad():
+                outs_x_ulb_w = self.model(x_ulb_w)
+                logits_x_ulb_w = outs_x_ulb_w['logits']
+                feats_x_ulb_w = outs_x_ulb_w['feat']
+            feat_dict = {'x_lb':feats_x_lb, 'x_ulb_w':feats_x_ulb_w, 'x_ulb_s':feats_x_ulb_s}
+
+            return self._post_process_logits(logits_x_lb, logits_x_ulb_w, logits_x_ulb_s, y_lb, idx_ulb, feat_dict=feat_dict)
     
     # @overrides
     def get_logits(self, data, out_key):
@@ -218,4 +244,5 @@ class MultiheadAPM(AlgorithmBase):
             SSL_Argument('--no_low', str2bool, False),
             SSL_Argument('--apm_disagreement_weight', float, -1), # in [0, 1] if set
             SSL_Argument('--adjust_clf_size', str2bool, False),
+            SSL_Argument('--multihead_apm_variant', str, "original"),
         ]

@@ -88,10 +88,14 @@ class CoSSLParamUpdateHook(ParamUpdateHook):
                                                                algorithm.lb_cnt_per_class, algorithm.num_classes,
                                                                algorithm.gpu)
             
-            algorithm.model.module.teacher_classifier.weight.data.copy_(init_teacher.module.classifier.weight.data)
-            algorithm.model.module.teacher_classifier.bias.data.copy_(init_teacher.module.classifier.bias.data)
-            algorithm.ema_model.module.teacher_classifier.weight.data.copy_(init_ema_teacher.module.classifier.weight.data)
-            algorithm.ema_model.module.teacher_classifier.bias.data.copy_(init_ema_teacher.module.classifier.bias.data)
+            # algorithm.model.module.teacher_classifier.weight.data.copy_(init_teacher.module.classifier.weight.data)
+            # algorithm.model.module.teacher_classifier.bias.data.copy_(init_teacher.module.classifier.bias.data)
+            # algorithm.ema_model.module.teacher_classifier.weight.data.copy_(init_ema_teacher.module.classifier.weight.data)
+            # algorithm.ema_model.module.teacher_classifier.bias.data.copy_(init_ema_teacher.module.classifier.bias.data)
+            algorithm.model.teacher_classifier.weight.data.copy_(init_teacher.classifier.weight.data)
+            algorithm.model.teacher_classifier.bias.data.copy_(init_teacher.classifier.bias.data)
+            algorithm.ema_model.teacher_classifier.weight.data.copy_(init_ema_teacher.classifier.weight.data)
+            algorithm.ema_model.teacher_classifier.bias.data.copy_(init_ema_teacher.classifier.bias.data)
             algorithm.ema.load(algorithm.ema_model)
 
             algorithm.mixup_prob = [(max(algorithm.lb_cnt_per_class) - i) / max(algorithm.lb_cnt_per_class) for i in algorithm.lb_cnt_per_class]
@@ -143,13 +147,13 @@ class CoSSL(ImbAlgorithmBase):
         tfe_labeled_set = copy.deepcopy(self.dataset_dict['train_lb'])
         tfe_unlabeled_set = copy.deepcopy(self.dataset_dict['train_ulb'])
 
-        if self.tfe_augment == 'weak':
-            tfe_labeled_set.transform = self.dataset_dict['train_ulb'].transform
-        elif self.tfe_augment == 'strong':
-            tfe_labeled_set.transform = self.dataset_dict['train_ulb'].strong_transform
-        else:
-            raise NotImplementedError
-        tfe_unlabeled_set.transform = tfe_labeled_set.transform
+        # if self.tfe_augment == 'weak':
+        #     tfe_labeled_set.transform = self.dataset_dict['train_ulb'].transform
+        # elif self.tfe_augment == 'strong':
+        #     tfe_labeled_set.transform = self.dataset_dict['train_ulb'].strong_transform
+        # else:
+        #     raise NotImplementedError
+        # tfe_unlabeled_set.transform = tfe_labeled_set.transform
 
         # TODO: better to use our own get_data_loader
         tfe_unlabeled_loader = data.DataLoader(tfe_unlabeled_set, batch_size=self.tfe_u_ratio * self.args.batch_size,
@@ -241,7 +245,8 @@ class CoSSL(ImbAlgorithmBase):
             new_feat_tensor = torch.stack(new_feat_list, dim=0)  # [64, 128]
             new_target_tensor = torch.stack(new_target_list, dim=0)  # [64, 10]
 
-        teacher_logits = self.model.module.teacher_classifier(new_feat_tensor)
+        # teacher_logits = self.model.module.teacher_classifier(new_feat_tensor)
+        teacher_logits = self.model.teacher_classifier(new_feat_tensor)
         teacher_loss = self.ce_loss(teacher_logits, new_target_tensor, reduction='mean')
  
         out_dict['loss'] += teacher_loss
