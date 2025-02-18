@@ -35,7 +35,7 @@ def split_ssl_data(args, data, targets, num_classes,
         ulb_index: If np.array of index is given, select the data[index], target[index] as labeled samples.
         include_lb_to_ulb: If True, labeled data is also included in unlabeled data
     """
-    data, targets = np.array(data), np.array(targets)
+    targets = np.array(targets)
     lb_idx, ulb_idx = sample_labeled_unlabeled_data(args, data, targets, num_classes, 
                                                     lb_num_labels, ulb_num_labels,
                                                     lb_imbalance_ratio, ulb_imbalance_ratio, load_exist=False)
@@ -49,7 +49,10 @@ def split_ssl_data(args, data, targets, num_classes,
     if include_lb_to_ulb:
         ulb_idx = np.concatenate([lb_idx, ulb_idx], axis=0)
 
-    return data[lb_idx], targets[lb_idx], data[ulb_idx], targets[ulb_idx]
+    lb_data = [data[i] for i in lb_idx]
+    ulb_data = [data[i] for i in ulb_idx]
+
+    return lb_data, targets[lb_idx], ulb_data, targets[ulb_idx]
 
 
 def sample_labeled_unlabeled_data(args, data, target, num_classes,
@@ -103,7 +106,6 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
     lb_idx = []
     ulb_idx = []
 
-    # #TODO make this smarter
     # if num_classes == 2:
     #     idx0 = np.where(target == 0)[0]
     #     idx1 = np.where(target == 1)[0]

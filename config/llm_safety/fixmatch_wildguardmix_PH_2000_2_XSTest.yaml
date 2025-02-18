@@ -1,13 +1,13 @@
 algorithm: fixmatch
 save_dir: ./saved_models/usb_llm_safety
-save_name: fixmatch_wildguardmix_PH_2000_2
+save_name: fixmatch_wildguardmix_PH_2000_aegis1.0_wildguard_eda_2
 resume: True
-load_path: ./saved_models/usb_llm_safety/fixmatch_wildguardmix_PH_2000_2/latest_model.pth
+load_path: ./saved_models/usb_llm_safety/fixmatch_wildguardmix_PH_2000_aegis1.0_wildguard_eda_2/model_best.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: False
 epoch: 1
-num_train_iter: 102400
+num_train_iter: 50000
 num_warmup_iter: 5120
 num_log_iter: 256
 num_eval_iter: 2048
@@ -44,3 +44,5 @@ dist_url: tcp://127.0.0.1:10008
 dist_backend: nccl
 gpu: None
 include_lb_to_ulb: False
+text_weak_aug: eda_synonym
+text_strong_aug: eda_full

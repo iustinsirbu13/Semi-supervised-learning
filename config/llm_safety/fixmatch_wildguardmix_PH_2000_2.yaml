@@ -6,7 +6,7 @@ load_path: ./saved_models/usb_llm_safety/fixmatch_wildguardmix_PH_2000_2/latest_
 overwrite: True
 use_tensorboard: True
 use_wandb: False
-epoch: 100
+epoch: 1
 num_train_iter: 102400
 num_warmup_iter: 5120
 num_log_iter: 256
@@ -44,3 +44,5 @@ dist_url: tcp://127.0.0.1:10008
 dist_backend: nccl
 gpu: None
 include_lb_to_ulb: False
+text_weak_aug: orig
+text_strong_aug: translated

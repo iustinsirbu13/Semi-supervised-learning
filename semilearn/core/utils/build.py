@@ -57,7 +57,7 @@ def get_logger(name, save_path=None, level='INFO'):
     return logger
 
 
-def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./data', include_lb_to_ulb=True):
+def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./data', include_lb_to_ulb=True, text_weak_aug=None, text_strong_aug=None, load_labeled=False):
     """
     create dataset
 
@@ -70,7 +70,7 @@ def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./d
         data_dir: data folder
         include_lb_to_ulb: flag of including labeled data into unlabeled data
     """
-    from semilearn.datasets import get_eurosat, get_medmnist, get_semi_aves, get_cifar, get_svhn, get_stl10, get_imagenet, get_json_dset, get_pkl_dset
+    from semilearn.datasets import get_eurosat, get_medmnist, get_semi_aves, get_cifar, get_svhn, get_stl10, get_imagenet, get_json_dset, get_pkl_dset, get_json_dset_aug_list
     if dataset == "eurosat":
         lb_dset, ulb_dset, eval_dset = get_eurosat(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
         test_dset = None
@@ -98,8 +98,10 @@ def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./d
     # speech dataset
     elif dataset in ['esc50', 'fsdnoisy', 'gtzan', 'superbks', 'superbsi', 'urbansound8k']:
         lb_dset, ulb_dset, eval_dset, test_dset = get_pkl_dset(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
-    elif dataset in ['aclImdb', 'ag_news', 'amazon_review', 'dbpedia', 'yahoo_answers', 'yelp_review', 'wildguardmix_PH', 'OAIMod_PH', 'XSTest_PH', 'OAIMod_PH_NN', 'wildguardmix_RH', 'XSTest_RH']:
+    elif dataset in ['aclImdb', 'ag_news', 'amazon_review', 'dbpedia', 'yahoo_answers', 'yelp_review']:
         lb_dset, ulb_dset, eval_dset, test_dset = get_json_dset(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
+    elif dataset in ['wildguardmix_PH_eda', 'wildguardmix_PH_translate', 'wildguardmix_RH_eda', 'wildguardmix_RH_translate', 'OAIMod_PH', 'XSTest_PH', 'OAIMod_PH_NN', 'XSTest_RH', 'wildguardmix_RH_translate_eda', 'wildguardmix_PH_translate_test', 'aegis1.0_PH_eda', 'aegis1.0_PH_eda_2', 'aegis_PH_multiclass_eda']:
+        lb_dset, ulb_dset, eval_dset, test_dset = get_json_dset_aug_list(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb, text_weak_aug=text_weak_aug, text_strong_aug=text_strong_aug, load_labeled=load_labeled)
     else:
         return None
     

@@ -41,6 +41,11 @@ class AlgorithmBase:
         logger=None,
         **kwargs):
         
+        # custom arguments
+        self.load_labeled = args.load_labeled
+        self.text_weak_aug = args.text_weak_aug
+        self.text_strong_aug = args.text_strong_aug
+
         # common arguments
         self.args = args
         self.num_classes = args.num_classes
@@ -103,6 +108,7 @@ class AlgorithmBase:
         self.hooks_dict = OrderedDict() # actual object to be used to call hooks
         self.set_hooks()
 
+
     def init(self, **kwargs):
         """
         algorithm specific init function, to add parameters into class
@@ -116,8 +122,8 @@ class AlgorithmBase:
         """
         if self.rank != 0 and self.distributed:
             torch.distributed.barrier()
-
-        dataset_dict = get_dataset(self.args, self.algorithm, self.args.dataset, self.args.num_labels, self.args.num_classes, self.args.data_dir, self.args.include_lb_to_ulb)
+        
+        dataset_dict = get_dataset(self.args, self.algorithm, self.args.dataset, self.args.num_labels, self.args.num_classes, self.args.data_dir, self.args.include_lb_to_ulb, self.text_weak_aug, self.text_strong_aug, self.load_labeled)
         if dataset_dict is None:
             return dataset_dict
 
@@ -366,7 +372,7 @@ class AlgorithmBase:
         y_pred = np.array(y_pred)
         y_logits = np.concatenate(y_logits)
         top1 = accuracy_score(y_true, y_pred)
-        top5 = top_k_accuracy_score(y_true, y_probs, k=5) if self.num_classes > 2 else 1.0
+        top5 = top_k_accuracy_score(y_true, y_probs, k=5, labels=list(range(self.num_classes))) if self.num_classes > 2 else 1.0
         balanced_top1 = balanced_accuracy_score(y_true, y_pred)
         precision = precision_score(y_true, y_pred, average='macro')
         recall = recall_score(y_true, y_pred, average='macro')

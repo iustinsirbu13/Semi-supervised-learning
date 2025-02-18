@@ -8,9 +8,9 @@ use_tensorboard: True
 use_wandb: False
 epoch: 100
 num_train_iter: 125000
-num_warmup_iter: 5120
+num_warmup_iter: 2500
 num_log_iter: 256
-num_eval_iter: 1536
+num_eval_iter: 1000
 num_labels: 20000
 batch_size: 16
 eval_batch_size: 16

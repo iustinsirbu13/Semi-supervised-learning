@@ -1,10 +1,12 @@
-from datasets import load_dataset
 import json
 import os
 import numpy as np
 from eda import eda
 from langdetect import detect
 from collections import Counter
+from sklearn.model_selection import train_test_split
+import pandas as pd
+from tqdm import tqdm
 
 def check_lang(text):
     try:
@@ -24,19 +26,17 @@ def format_as_json():
     }
     os.makedirs(dst_path, exist_ok=True)
 
-    ds_test = load_dataset("allenai/wildguardmix", "wildguardtest", split='test')
-    ds_train = load_dataset("allenai/wildguardmix", "wildguardtrain", split='train')
-    train_size = ds_train.num_rows
+    ds_test = pd.read_csv("./data/wildguardmix_orig/wildguard_test.csv")
+    ds_train = pd.read_csv("./data/wildguardmix_orig/wildguard_train.csv")
+    ds_test = ds_test[ds_test[response_column].notna()]
+    ds_train = ds_train[ds_train[response_column].notna()]
 
-    ds_train = ds_train.filter(lambda example: example[response_column] is not None)
-    ds_test = ds_test.filter(lambda example: example[response_column] is not None)
-
-    # ds_train = ds_train.train_test_split(test_size=train_size//10, seed=seed, stratify_by_column=label_column)
-    ds_train = ds_train.train_test_split(test_size=train_size//10, seed=seed)
-    ds_valid = ds_train['test']
-    # ds_train = ds_train['train'].train_test_split(test_size=train_size//10, seed=seed, stratify_by_column=label_column)
-    ds_train_full = ds_train['train']
-
+    ds_train_full, ds_valid = train_test_split(
+        ds_train,
+        test_size=0.1,
+        stratify=ds_train[label_column],
+        random_state=seed
+    )
 
     datasets = {
        'dev': ds_valid,
@@ -51,9 +51,15 @@ def format_as_json():
         cnt = 0
         with open(os.path.join(dst_path, f'{split_name}.json'), 'w') as outfile:
             print(split_ds.shape)
-            for idx, elem in enumerate(split_ds.filter(lambda example: example[label_column] is not None
-                                                       and len(example[prompt_column]) > 0 and len(example[response_column]) > 0 
-                                                       and check_lang(example[prompt_column]) and check_lang(example[response_column]))):
+            filtered_ds = split_ds[
+                (split_ds[label_column].notna()) &
+                (split_ds[prompt_column].str.len() > 0) &
+                (split_ds[response_column].str.len() > 0) &
+                (split_ds[prompt_column].apply(check_lang)) &
+                (split_ds[response_column].apply(check_lang))
+            ]
+            print(filtered_ds.shape)
+            for idx, (index, elem) in enumerate(tqdm(filtered_ds.iterrows(), total=len(filtered_ds), desc=f'Processing {split_name}')):
                 data[str(idx)] = {}
                 data[str(idx)]['ori'] = [elem[prompt_column], elem[response_column]]
                 try:
@@ -67,15 +73,15 @@ def format_as_json():
                 if split_name in ['train']:
                     if len(data[str(idx)]['ori']) == 0:
                         continue
-                    probs = [0.0, 0.0, 0.0, 0.0]
-                    probs[np.random.randint(0, 3)] = 0.2
+                    probs = [0.1, 0.1, 0.1, 0.1]
                     try: 
                         # print(data[str(idx)]['ori'])
                         # syn = eda(data[str(idx)]['ori'], 0.2, 0.0, 0.0, 0.0, 1)
                         # print(syn[0])
                         # exit()
-                        data[str(idx)]['aug_0'] = [eda(data[str(idx)]['ori'][0], 0.2, 0.0, 0.0, 0.0, 1)[0], eda(data[str(idx)]['ori'][1], 0.2, 0.0, 0.0, 0.0, 1)[0]]
-                        data[str(idx)]['aug_1'] = [eda(data[str(idx)]['ori'][0], probs[0], probs[1], probs[2], probs[3], 1)[0], eda(data[str(idx)]['ori'][1], probs[0], probs[1], probs[2], probs[3], 1)[0]]
+                        # data[str(idx)]['eda_synonym'] = list(zip(eda(data[str(idx)]['ori'][0], 0.0, 0.0, 0.0, 0.0, per_technique=True), eda(data[str(idx)]['ori'][1], 0.0, 0.0, 0.0, 0.0, per_technique=True)))
+                        data[str(idx)]['eda_synonym'] = [data[str(idx)]['ori'][0], data[str(idx)]['ori'][1]]
+                        data[str(idx)]['eda_full'] = list(zip(eda(data[str(idx)]['ori'][0], probs[0], probs[1], probs[2], probs[3], num_aug=12), eda(data[str(idx)]['ori'][1], probs[0], probs[1], probs[2], probs[3], num_aug=12)))
                     except Exception as e:
                         print("language not supported")
                         raise e

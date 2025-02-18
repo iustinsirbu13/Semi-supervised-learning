@@ -20,10 +20,9 @@ def format_as_json():
 
     df = pd.read_json("hf://datasets/mmathys/openai-moderation-api-evaluation/samples-1680.jsonl.gz", lines=True)
     
-    # choose first line to treat none lines as safe, or second one to remove them
 
-    # df = df.fillna(0)
-    df = df[~((~df.eq(1).any(axis=1)) & df.isna().any(axis=1))]
+    df = df.fillna(0)
+    # df = df[~((~df.eq(1).any(axis=1)) & df.isna().any(axis=1))]
 
     df["label"] = (df == 1).any(axis=1).replace({True : "unsafe", False : "safe"})
     # print(df.head(10))

@@ -30,7 +30,15 @@ def get_config():
     from semilearn.algorithms.utils import str2bool
 
     parser = argparse.ArgumentParser(description="Semi-Supervised Learning (USB)")
-
+    """
+    labeled/unlabeled splits
+    """
+    parser.add_argument("--load_labeled", type=bool, default=False)
+    """
+    Augmentation types
+    """
+    parser.add_argument("--text_weak_aug", type=str, default=None)
+    parser.add_argument("--text_strong_aug", type=str, default=None)
     """
     Saving & loading of the model.
     """
@@ -289,7 +297,7 @@ def main(args):
                 "Saving & Loading paths are same. \
                             If you want over-write, give --overwrite in the argument."
             )
-
+    
     if args.seed is not None:
         warnings.warn(
             "You have chosen to seed training. "

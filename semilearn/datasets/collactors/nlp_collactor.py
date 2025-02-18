@@ -49,8 +49,11 @@ class DataCollatorWithPadding:
         Max = 0
         for f in features:
             f_ = {k:v for k,v in f.items() if 'text' not in k}
-            if isinstance(f['text'], np.ndarray) or isinstance(f['text'], list):
-                input_ids = self.tokenizer.encode_plus(f['text'][0], f['text'][1], max_length=self.max_length, truncation=True, padding=False)['input_ids']
+            if isinstance(f['text'], np.ndarray) or isinstance(f['text'], list) or isinstance(f['text'], tuple):
+                try:
+                    input_ids = self.tokenizer.encode_plus(f['text'][0], f['text'][1], max_length=self.max_length, truncation="only_first", padding=False)['input_ids']
+                except:
+                    input_ids = self.tokenizer.encode_plus(f['text'][0], f['text'][1], max_length=self.max_length, truncation=True, padding=False)['input_ids']
             else:
                 input_ids = self.tokenizer(f['text'], max_length=self.max_length, truncation=True, padding=False)['input_ids']
             Max = max(Max, len(input_ids))
@@ -59,15 +62,21 @@ class DataCollatorWithPadding:
             w_features.append(f_)
 
             if 'text_s' in f:
-                if isinstance(f['text_s'], np.ndarray) or isinstance(f['text'], list):
-                    input_ids_s = self.tokenizer.encode_plus(f['text_s'][0], f['text_s'][0], max_length=self.max_length, truncation=True, padding=False)['input_ids']
+                if isinstance(f['text_s'], np.ndarray) or isinstance(f['text_s'], list) or isinstance(f['text_s'], tuple):
+                    try:
+                        input_ids_s = self.tokenizer.encode_plus(f['text_s'][0], f['text_s'][1], max_length=self.max_length, truncation="only_first", padding=False)['input_ids']
+                    except:
+                        input_ids_s = self.tokenizer.encode_plus(f['text_s'][0], f['text_s'][1], max_length=self.max_length, truncation=True, padding=False)['input_ids']
                 else:
                     input_ids_s = self.tokenizer(f['text_s'], max_length=self.max_length, truncation=True, padding=False)['input_ids']
                 s_features.append({'input_ids':input_ids_s})
 
             if 'text_s_' in f:
-                if isinstance(f['text_s_'], np.ndarray) or isinstance(f['text'], list):
-                    input_ids_s_ = self.tokenizer.encode_plus(f['text_s_'][0], f['text_s_'][1], max_length=self.max_length, truncation=True, padding=False)['input_ids']
+                if isinstance(f['text_s_'], np.ndarray) or isinstance(f['text_s_'], list) or isinstance(f['text_s'], tuple):
+                    try:
+                        input_ids_s_ = self.tokenizer.encode_plus(f['text_s_'][0], f['text_s_'][1], max_length=self.max_length, truncation="only_first", padding=False)['input_ids']
+                    except:
+                        input_ids_s_ = self.tokenizer.encode_plus(f['text_s_'][0], f['text_s_'][1], max_length=self.max_length, truncation=True, padding=False)['input_ids']
                 else:
                     input_ids_s_ = self.tokenizer(f['text_s_'], max_length=self.max_length, truncation=True, padding=False)['input_ids']
                 s_features_.append({'input_ids':input_ids_s_})
@@ -124,18 +133,18 @@ class DataCollatorWithPadding:
 
 
 def get_bert_base_uncased_collactor(max_length=512):
-    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', truncation_side='left')
     collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
     return collact_fn
 
 
 def get_bert_base_cased_collactor(max_length=512):
-    tokenizer = BertTokenizerFast.from_pretrained('bert-base-cased')
+    tokenizer = BertTokenizerFast.from_pretrained('bert-base-cased', truncation_side='left')
     collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
     return collact_fn
 
 
 def get_longformer_base_collactor(max_length):
-    tokenizer = LongformerTokenizerFast.from_pretrained('allenai/longformer-base-4096')
+    tokenizer = LongformerTokenizerFast.from_pretrained('allenai/longformer-base-4096', truncation_side='left')
     collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
     return collact_fn
