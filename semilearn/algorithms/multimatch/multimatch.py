@@ -13,7 +13,7 @@ from semilearn.algorithms.multimatch.flexmatch_log_hook import FlexMatchLogHook
 from semilearn.algorithms.flexmatch.utils import FlexMatchThresholdingHook
 
 from semilearn.algorithms.multimatch.freematch_log_hook import FreeMatchLogHook
-from semilearn.algorithms.freematch.utils import FreeMatchThresholdingHook
+from semilearn.algorithms.freematch.utils import FreeMatchThresholingHook as FreeMatchThresholdingHook
 
 import jsonlines
 import os
@@ -26,6 +26,7 @@ class MultiMatch(AlgorithmBase):
         
         # multihead specific arguments
         self.num_heads = args.num_heads
+        args.device = torch.device('cuda', args.gpu) if args.gpu is not None else 'cpu'
 
         self.init_maskinghook_args(T=args.T, hard_label=args.hard_label, ema_p=args.ema_p, use_quantile=args.use_quantile,
                                    clip_thresh=args.clip_thresh, p_cutoff=args.p_cutoff, thresh_warmup=args.thresh_warmup,
@@ -345,7 +346,7 @@ class MultiMatch(AlgorithmBase):
             SSL_Argument('--num_heads', int, 3),
             SSL_Argument('--smoothness', float, 0.997),
             SSL_Argument('--no_low', str2bool, False),
-            SSL_Argument('--apm_disagreement_weight', float, -1), # in [0, 1] if set
+            SSL_Argument('--apm_disagreement_weight', float, 3),
             SSL_Argument('--adjust_clf_size', str2bool, False),
             SSL_Argument('--multihead_apm_variant', str, "v4"),
             SSL_Argument('--num_recalibrate_iter', int, 0), # if 0, it will be done every epoch
