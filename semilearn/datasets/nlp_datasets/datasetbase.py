@@ -61,20 +61,34 @@ class BasicDataset(Dataset):
         sen = self.data[idx]
         # set augmented images
         if self.is_ulb == False:
-            return {'idx':idx, 'text':sen[0], 'label':target} 
+            if self.alg == 'defixmatch':
+                return {'idx':idx, 'text':sen[0], 'text_s': sen[self.random_choose_sen()], 'label':target}
+            else:
+                return {'idx':idx, 'text':sen[0], 'label':target} 
+            
         else:
             if self.alg == 'fullysupervised' or self.alg == 'supervised':
-                return {'idx':idx, 'text':sen[0], 'label':target} 
+                d = {'idx':idx, 'text':sen[0], 'label':target}
+                d['ulb_label'] = -1 if target is None else target
+                return d
             if self.alg == 'pseudolabel' or self.alg == 'vat':
-                return {'idx':idx, 'text':sen[0]} 
+                d = {'idx':idx, 'text':sen[0]}
+                d['ulb_label'] = -1 if target is None else target
+                return d
             elif self.alg == 'pimodel' or self.alg == 'meanteacher' or self.alg == 'mixmatch':
-                return {'idx':idx, 'text':sen[0], 'text_s':sen[0]}
+                d = {'idx':idx, 'text':sen[0], 'text_s':sen[0]}
+                d['ulb_label'] = -1 if target is None else target
+                return d
             elif self.alg == 'comatch' or self.alg == 'remixmatch':
                 indices = [1, 2]
                 np.random.shuffle(indices)
-                return {'idx':idx, 'text':sen[0], 'text_s':sen[indices[0]], 'text_s_':sen[indices[1]]}
+                d = {'idx':idx, 'text':sen[0], 'text_s':sen[indices[0]], 'text_s_':sen[indices[1]]}
+                d['ulb_label'] = -1 if target is None else target
+                return d
             else:
-                return {'idx':idx, 'text':sen[0], 'text_s':sen[self.random_choose_sen()]}
+                d = {'idx':idx, 'text':sen[0], 'text_s':sen[self.random_choose_sen()]}
+                d['ulb_label'] = -1 if target is None else target
+                return d
                 
     def __len__(self):
         return len(self.data)
