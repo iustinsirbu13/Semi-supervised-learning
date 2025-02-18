@@ -1,0 +1,6 @@
+fairseq
+# omegaconf
+# hydra-core
+# bitarray
+# sacrebleu
+fastBPE
