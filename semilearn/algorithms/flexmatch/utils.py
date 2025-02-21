@@ -23,6 +23,7 @@ class FlexMatchThresholdingHook(MaskingHook):
     @torch.no_grad()
     def update(self, *args, **kwargs):
         pseudo_counter = Counter(self.selected_label.tolist())
+        self.pseudo_counter = pseudo_counter
         if max(pseudo_counter.values()) < self.ulb_dest_len:  # not all(5w) -1
             if self.thresh_warmup:
                 for i in range(self.num_classes):
