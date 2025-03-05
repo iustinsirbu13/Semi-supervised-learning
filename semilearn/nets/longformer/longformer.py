@@ -8,14 +8,12 @@ class ClassificationLongformer(nn.Module):
         super(ClassificationLongformer, self).__init__()
         # Load pre-trained Longformer model
         self.longformer = LongformerModel.from_pretrained(name)
-        self.dropout = torch.nn.Dropout(p=0.2, inplace=False)
+        self.dropout = torch.nn.Dropout(p=0.1, inplace=False)
         self.num_features = 768
         self.classifier = nn.Sequential(*[
-            nn.Linear(768, 1024),
+            nn.Linear(768, 768),
             nn.GELU(),
-            nn.Linear(1024, 1024),
-            nn.GELU(),
-            nn.Linear(1024, num_classes)
+            nn.Linear(768, num_classes)
         ])
 
     def forward(self, x, only_fc=False, only_feat=False, return_embed=False, **kwargs):

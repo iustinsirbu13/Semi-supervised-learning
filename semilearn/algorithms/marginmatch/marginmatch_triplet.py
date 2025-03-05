@@ -1,0 +1,267 @@
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+import torch
+import torch.nn.functional as F
+
+from semilearn.algorithms.multimatch.flexmatch_log_hook import FlexMatchLogHook
+from semilearn.algorithms.flexmatch.utils import FlexMatchThresholdingHook
+
+from semilearn.algorithms.multimatch.freematch_log_hook import FreeMatchLogHook
+from semilearn.algorithms.freematch.utils import FreeMatchThresholingHook as FreeMatchThresholdingHook
+
+from semilearn.algorithms.marginmatch.marginmatch_hook import MarginMatchHook
+from semilearn.algorithms.marginmatch.marginmatch_log_hook import MarginMatchLogHook
+from semilearn.core import AlgorithmBase
+from semilearn.core.utils import ALGORITHMS
+from semilearn.algorithms.hooks import PseudoLabelingHook
+from semilearn.algorithms.utils import SSL_Argument, str2bool
+
+# import jsonlines
+import os
+
+@ALGORITHMS.register('marginmatch')
+class MarginMatch(AlgorithmBase):
+    def __init__(self, args, net_builder, tb_log=None, logger=None):
+        args.device = torch.device('cuda', args.gpu) if args.gpu is not None else 'cpu'
+        self.init(T=args.T, hard_label=args.hard_label, ema_p=args.ema_p, use_quantile=args.use_quantile, clip_thresh=args.clip_thresh,
+                  p_cutoff=args.p_cutoff, thresh_warmup=args.thresh_warmup, threshold_algo=args.threshold_algo)
+        
+        super().__init__(args, net_builder, tb_log, logger) 
+    
+
+    def init(self, T, p_cutoff, hard_label=True, ema_p=0.999, use_quantile=True, clip_thresh=False, thresh_warmup=True, threshold_algo='flexmatch'):
+        self.T = T
+        self.p_cutoff = p_cutoff
+        self.use_hard_label = hard_label
+        
+        self.thresh_warmup = thresh_warmup
+
+        self.ema_p = ema_p
+        self.use_quantile = use_quantile
+        self.clip_thresh = clip_thresh
+
+        self.threshold_algo = threshold_algo
+
+    # @overrides
+    # def set_model(self):
+    #     """
+    #     initialize model
+    #     """
+    #     model = self.net_builder(self.args)
+    #     return model
+
+    # @overrides
+    # def set_ema_model(self):
+    #     """
+    #     initialize ema model from model
+    #     """
+    #     ema_model = self.net_builder(self.args)
+    #     ema_model.load_state_dict(self.model.state_dict())
+    #     return ema_model
+
+    # @overrides
+    def set_hooks(self):
+        self.register_hook(PseudoLabelingHook(), "PseudoLabelingHook")
+
+        self.register_hook(MarginMatchHook(self.args), "PartialMarginHook")
+        self.register_hook(MarginMatchLogHook(), "MarginMatchLogHook")
+
+        if self.threshold_algo == 'flexmatch':
+            self.register_hook(FlexMatchThresholdingHook(ulb_dest_len=self.args.ulb_dest_len, num_classes=self.num_classes, thresh_warmup=self.args.thresh_warmup), "MaskingHook")
+            self.register_hook(FlexMatchLogHook(), "FlexMatchLogHook")
+        elif self.threshold_algo == 'freematch':
+            self.register_hook(FreeMatchThresholdingHook(num_classes=self.num_classes, momentum=self.args.ema_p), "MaskingHook")
+            self.register_hook(FreeMatchLogHook(), 'FreeMatchLogHook')
+        else:
+            raise NotImplementedError()
+
+        super().set_hooks()
+
+
+    def triplet_loss(self, features, labels, mask=None, margin=1.0):
+        batch_size = features.size()[0]
+        loss = torch.tensor(0.0, device=features.device)
+        triplet_cnt = 0
+
+        for i in range(batch_size):
+            if mask is not None and mask[i] == 0:
+                continue
+
+            anchor = features[i]
+
+            # select all examples with same label as anchor
+            similar_idx = ((labels == labels[i]) & (mask != 0)).nonzero(as_tuple=False).squeeze()
+            similar_idx = similar_idx[similar_idx != i]
+
+            # make tensor if there is only 1 example
+            if similar_idx.dim() == 0:
+                similar_idx = similar_idx.unsqueeze(0)
+            similar_examples = features[similar_idx]
+        
+            #select all examples with different label than anchor
+            dissimilar_idx = ((labels != labels[i]) & (mask != 0)).nonzero(as_tuple=False).squeeze()
+
+            # make tensor if there is only 1 example
+            if dissimilar_idx.dim() == 0:
+                dissimilar_idx = dissimilar_idx.unsqueeze(0)
+            dissimilar_examples = features[dissimilar_idx]
+
+            for similar in similar_examples:
+                for dissimilar in dissimilar_examples:
+                    # calculating distance with cosine similarity: 1 if similar, 0 if different
+                    # unsqueeze to have size of batch (1) in first dimension for the function to work
+                    d_similar = 1 - F.cosine_similarity(anchor.unsqueeze(0), similar.unsqueeze(0))
+                    d_dissimilar = 1 - F.cosine_similarity(anchor.unsqueeze(0), dissimilar.unsqueeze(0))
+                    curr_loss = F.relu(d_similar - d_dissimilar + margin).squeeze()
+                    loss += curr_loss
+                    triplet_cnt += 1
+
+        # divide loss by number of triplets
+        if triplet_cnt > 0:
+            loss /= triplet_cnt
+        return loss
+    
+    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s, idx_ulb, y_ulb):
+                #    lb_weak_image,
+                #    lb_weak_sentence, lb_weak_segment, lb_weak_mask,
+                #    lb_target,
+                #    ulb_weak_image, ulb_strong_image,
+                #    ulb_weak_sentence, ulb_weak_segment, ulb_weak_mask,
+                #    ulb_strong_sentence, ulb_strong_segment, ulb_strong_mask,
+                #    idx_ulb):
+        lb_batch_size = y_lb.shape[0]
+        # idx_ulb = idx_ulb.to(self.args.device)
+
+        if self.use_cat:
+            raise NotImplementedError()
+            inputs = torch.cat((x_lb, x_ulb_w, x_ulb_s))
+            inputs = inputs.to(self.args.device)
+            logits = self.model(inputs)['logits']
+            logits_x_lb = logits[:lb_batch_size]
+            logits_x_ulb_w, logits_x_ulb_s = logits[lb_batch_size:].chunk(2)
+        else:
+            outs_x_lb = self.model(x_lb)
+            logits_x_lb = outs_x_lb['logits']
+            feats_x_lb = outs_x_lb['feat']
+            outs_x_ulb_s = self.model(x_ulb_s)
+            logits_x_ulb_s = outs_x_ulb_s['logits']
+            feats_x_ulb_s = outs_x_ulb_s['feat']
+            with torch.no_grad():
+                outs_x_ulb_w = self.model(x_ulb_w)
+                logits_x_ulb_w = outs_x_ulb_w['logits']
+                feats_x_ulb_w = outs_x_ulb_w['feat']
+        feat_dict = {'x_lb':feats_x_lb, 'x_ulb_w':feats_x_ulb_w, 'x_ulb_s':feats_x_ulb_s}
+
+        sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
+
+        # calculate mask
+        if self.threshold_algo == 'freematch':
+            aux_mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=logits_x_ulb_w)
+        else:
+            # probs_x_ulb_w = torch.softmax(logits_x_ulb_w, dim=-1)
+            probs_x_ulb_w = self.compute_prob(logits_x_ulb_w.detach())
+            aux_mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False, idx_ulb=idx_ulb)
+
+        
+        # Average Partial Margin mask
+        apm_mask = self.call_hook("masking", "PartialMarginHook", logits_x_ulb_w=logits_x_ulb_w, logits_x_ulb_s=logits_x_ulb_s, idx_ulb=idx_ulb)
+
+        # Keep unlabeled data that passed both masking checks
+        mask = aux_mask * apm_mask
+        
+        # generate unlabeled targets using pseudo label hook
+        pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook", 
+                                        logits=logits_x_ulb_w,
+                                        use_hard_label=self.use_hard_label,
+                                        T=self.T)
+        if self.args.save_pseudolabels_stats:
+            my_stats_dict = {
+                'mask_rate': (mask == 0).float().mean().item(),
+                'aux_mask_rate': (aux_mask == 0).float().mean().item(),
+                'apm_mask_rate': (apm_mask == 0).float().mean().item(),
+                'impurity': (pseudo_label[mask != 0] == y_ulb[mask != 0]).float().mean().item(),
+            }
+            self._my_stats_log(my_stats_dict)
+
+        # calculate unlabeled loss
+        unsup_loss = self.consistency_loss(logits_x_ulb_s,
+                                        pseudo_label,
+                                        'ce',
+                                        mask=mask)
+
+        triplet_loss_lb = self.triplet_loss(feats_x_lb, y_lb)
+        triplet_loss_ulb = self.triplet_loss(feats_x_ulb_w, pseudo_label, mask)
+        total_loss = sup_loss + self.lambda_u * unsup_loss + triplet_loss_lb + triplet_loss_ulb
+
+        out_dict = self.process_out_dict(loss=total_loss, feat=feat_dict)
+        log_dict = self.process_log_dict(sup_loss=sup_loss.item(), 
+                                         unsup_loss=unsup_loss.item(),
+                                         triplet_loss_lb=triplet_loss_lb,
+                                         triplet_loss_ulb=triplet_loss_ulb,
+                                         total_loss=total_loss.item(),
+                                         util_ratio=mask.float().mean().item())
+        return out_dict, log_dict
+
+    def get_save_dict(self):
+        save_dict = super().get_save_dict()
+
+        # additional saving arguments
+        if self.threshold_algo == 'freematch':
+            save_dict['p_model'] = self.hooks_dict['MaskingHook'].p_model.cpu()
+            save_dict['time_p'] = self.hooks_dict['MaskingHook'].time_p.cpu()
+        else:
+            save_dict['classwise_acc'] = self.hooks_dict['MaskingHook'].classwise_acc.cpu()
+            save_dict['selected_label'] = self.hooks_dict['MaskingHook'].selected_label.cpu()
+
+        return save_dict
+
+
+    def load_model(self, load_path):
+        checkpoint = super().load_model(load_path)
+        
+        if self.threshold_algo == 'freematch':
+            self.hooks_dict['MaskingHook'].p_model = checkpoint['p_model'].cuda(self.args.gpu)
+            self.hooks_dict['MaskingHook'].time_p = checkpoint['time_p'].cuda(self.args.gpu)
+        else:
+            self.hooks_dict['MaskingHook'].classwise_acc = checkpoint['classwise_acc'].cuda(self.gpu)
+            self.hooks_dict['MaskingHook'].selected_label = checkpoint['selected_label'].cuda(self.gpu)
+            
+        self.print_fn("additional parameter loaded")
+        return checkpoint
+
+    def _my_stats_log(self, d):
+        d['epoch'] = self.epoch
+        d['it'] = self.it
+        # with jsonlines.open(os.path.join(self.args.save_dir, self.args.save_name, 'my_stats.jsonl'), mode='a') as writer:
+        #     writer.write(d)
+
+    @staticmethod
+    def get_argument():
+        return [
+            SSL_Argument('--save_pseudolabels_stats', str2bool, False),
+            SSL_Argument('--threshold_algo', str, 'flexmatch'),
+            SSL_Argument('--hard_label', str2bool, True),
+            SSL_Argument('--T', float, 0.5),
+            SSL_Argument('--ema_p', float, 0.999),
+            SSL_Argument('--ent_loss_ratio', float, 0.01),
+            SSL_Argument('--use_quantile', str2bool, False),
+            SSL_Argument('--clip_thresh', str2bool, False),
+            SSL_Argument('--apm_cutoff', float, 0.0),
+            SSL_Argument('--p_cutoff', float, 0.95),
+            SSL_Argument('--thresh_warmup', str2bool, True),
+            SSL_Argument('--smoothness', float, 0.997),
+        ]
+    
+    # @overrides
+    # def get_logits(self, data, *args, **kwargs):
+    #     images = data['lb_weak_image'].to(self.args.device)
+    #     sentences = data['lb_weak_sentence'].to(self.args.device)
+    #     segments = data['lb_weak_segment'].to(self.args.device)
+    #     masks = data['lb_weak_mask'].to(self.args.device)
+    #     return self.model(sentences, masks, segments, images)
+
+    # @overrides
+    # def get_targets(self, data, *args, **kwargs):
+    #     return data['lb_target'].to(self.args.device)

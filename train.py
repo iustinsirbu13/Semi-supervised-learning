@@ -31,6 +31,11 @@ def get_config():
 
     parser = argparse.ArgumentParser(description="Semi-Supervised Learning (USB)")
     """
+    binary classification for multiclass models
+    """
+    parser.add_argument("--force_binary_class", type=bool, default=False)
+    
+    """
     labeled/unlabeled splits
     """
     parser.add_argument("--load_labeled", type=bool, default=False)
@@ -245,6 +250,7 @@ def get_config():
     # add algorithm specific parameters
     args = parser.parse_args()
     over_write_args_from_file(args, args.c)
+    # raise Exception(name2alg.keys())
     for argument in name2alg[args.algorithm].get_argument():
         parser.add_argument(
             argument.name,
@@ -393,7 +399,8 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.resume and os.path.exists(args.load_path):
         try:
             model.load_model(args.load_path)
-        except:
+        except Exception as e:
+            logger.info(e)
             logger.info("Fail to resume load path {}".format(args.load_path))
             args.resume = False
     else:

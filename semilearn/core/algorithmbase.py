@@ -7,7 +7,7 @@ import contextlib
 import numpy as np
 from inspect import signature
 from collections import OrderedDict
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, top_k_accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, top_k_accuracy_score, classification_report, roc_auc_score
 
 import torch
 import torch.nn.functional as F
@@ -45,6 +45,7 @@ class AlgorithmBase:
         self.load_labeled = args.load_labeled
         self.text_weak_aug = args.text_weak_aug
         self.text_strong_aug = args.text_strong_aug
+        self.force_binary_class = args.force_binary_class
 
         # common arguments
         self.args = args
@@ -79,6 +80,7 @@ class AlgorithmBase:
         self.it = 0
         self.start_epoch = 0
         self.best_eval_acc, self.best_it = 0.0, 0
+        self.best_eval_F1_1 = 0.0
         self.bn_controller = Bn_Controller()
         self.net_builder = net_builder
         self.ema = None
@@ -129,7 +131,7 @@ class AlgorithmBase:
 
         self.args.ulb_dest_len = len(dataset_dict['train_ulb']) if dataset_dict['train_ulb'] is not None else 0
         self.args.lb_dest_len = len(dataset_dict['train_lb'])
-    
+
         self.print_fn("unlabeled data number: {}, labeled data number {}".format(self.args.ulb_dest_len, self.args.lb_dest_len))
         if self.rank == 0 and self.distributed:
             torch.distributed.barrier()
@@ -319,6 +321,7 @@ class AlgorithmBase:
                     break
 
                 self.call_hook("before_train_step")
+
                 self.out_dict, self.log_dict = self.train_step(**self.process_batch(**data_lb, **data_ulb))
                 self.call_hook("after_train_step")
                 self.it += 1
@@ -368,15 +371,35 @@ class AlgorithmBase:
                 y_logits.append(logits.cpu().numpy())
                 y_probs.extend(torch.softmax(logits, dim=-1).cpu().tolist())
                 total_loss += loss.item() * num_batch
+        
         y_true = np.array(y_true)
         y_pred = np.array(y_pred)
         y_logits = np.concatenate(y_logits)
+
+        if self.force_binary_class:
+            y_true = np.where(y_true == 0, 0, 1)
+            y_pred = np.where(y_pred == 0, 0, 1)
+            
+            y_probs_binary = []
+            for probs in y_probs:
+                new_prob = [probs[0], sum(probs[1:])]
+                y_probs_binary.append(new_prob)
+            y_probs = y_probs_binary
+
         top1 = accuracy_score(y_true, y_pred)
-        top5 = top_k_accuracy_score(y_true, y_probs, k=5, labels=list(range(self.num_classes))) if self.num_classes > 2 else 1.0
+        top5 = 1.0 if self.force_binary_class else (
+            top_k_accuracy_score(y_true, y_probs, k=5, labels=list(range(self.num_classes))) if self.num_classes > 2 else 1.0
+        )
+
         balanced_top1 = balanced_accuracy_score(y_true, y_pred)
         precision = precision_score(y_true, y_pred, average='macro')
         recall = recall_score(y_true, y_pred, average='macro')
         F1 = f1_score(y_true, y_pred, average='macro')
+
+        if self.num_classes == 2:
+            auc = roc_auc_score(y_true, [p[1] for p in y_probs])
+        else:
+            auc = -1
 
         cf_mat = confusion_matrix(y_true, y_pred, normalize='true')
         self.print_fn('confusion matrix:\n' + np.array_str(cf_mat))
@@ -393,6 +416,7 @@ class AlgorithmBase:
             eval_dest+'/precision': precision, 
             eval_dest+'/recall': recall, 
             eval_dest+'/F1': F1,
+            eval_dest+'/AUC': auc,
             eval_dest + '/precision-0' : report_per_class['0']['precision'],
             eval_dest + '/recall-0' : report_per_class['0']['recall'],
             eval_dest + '/F1-0' : report_per_class['0']['f1-score'],
@@ -420,6 +444,7 @@ class AlgorithmBase:
             'epoch': self.epoch + 1,
             'best_it': self.best_it,
             'best_eval_acc': self.best_eval_acc,
+            'best_eval_F1_1': self.best_eval_F1_1
         }
         if self.scheduler is not None:
             save_dict['scheduler'] = self.scheduler.state_dict()
@@ -451,6 +476,7 @@ class AlgorithmBase:
         self.epoch = self.start_epoch
         self.best_it = checkpoint['best_it']
         self.best_eval_acc = checkpoint['best_eval_acc']
+        # self.best_eval_F1_1 = checkpoint['best_eval_F1_1']
         self.optimizer.load_state_dict(checkpoint['optimizer'])
         if self.scheduler is not None and 'scheduler' in checkpoint:
             self.scheduler.load_state_dict(checkpoint['scheduler'])

@@ -15,7 +15,7 @@ from semilearn.algorithms.flexmatch.utils import FlexMatchThresholdingHook
 from semilearn.algorithms.multimatch.freematch_log_hook import FreeMatchLogHook
 from semilearn.algorithms.freematch.utils import FreeMatchThresholingHook as FreeMatchThresholdingHook
 
-import jsonlines
+# import jsonlines
 import os
 
 
@@ -335,8 +335,8 @@ class MultiMatch(AlgorithmBase):
     def _my_stats_log(self, d):
         d['epoch'] = self.epoch
         d['it'] = self.it
-        with jsonlines.open(os.path.join(self.args.save_dir, self.args.save_name, 'my_stats.jsonl'), mode='a') as writer:
-            writer.write(d)
+        # with jsonlines.open(os.path.join(self.args.save_dir, self.args.save_name, 'my_stats.jsonl'), mode='a') as writer:
+        #     writer.write(d)
 
     @staticmethod
     def get_argument():

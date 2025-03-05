@@ -100,7 +100,7 @@ def get_dataset(args, algorithm, dataset, num_labels, num_classes, data_dir='./d
         lb_dset, ulb_dset, eval_dset, test_dset = get_pkl_dset(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
     elif dataset in ['aclImdb', 'ag_news', 'amazon_review', 'dbpedia', 'yahoo_answers', 'yelp_review']:
         lb_dset, ulb_dset, eval_dset, test_dset = get_json_dset(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb)
-    elif dataset in ['wildguardmix_PH_eda', 'wildguardmix_PH_translate', 'wildguardmix_RH_eda', 'wildguardmix_RH_translate', 'OAIMod_PH', 'XSTest_PH', 'OAIMod_PH_NN', 'XSTest_RH', 'wildguardmix_RH_translate_eda', 'wildguardmix_PH_translate_test', 'aegis1.0_PH_eda', 'aegis1.0_PH_eda_2', 'aegis_PH_multiclass_eda']:
+    elif dataset in ['wildguardmix_PH_eda', 'wildguardmix_PH_translate', 'wildguardmix_RH_eda', 'wildguardmix_RH_translate', 'OAIMod_PH', 'XSTest_PH', 'OAIMod_PH_NN', 'XSTest_RH', 'wildguardmix_RH_translate_eda', 'wildguardmix_PH_translate_test', 'aegis1.0_PH_eda', 'aegis1.0_PH_eda_2', 'aegis_PH_multiclass_eda', 'aegis2.0_PH_multiclass_eda', 'aegis2.0_PH_eda', 'aegis2.0_RH_eda']:
         lb_dset, ulb_dset, eval_dset, test_dset = get_json_dset_aug_list(args, algorithm, dataset, num_labels, num_classes, data_dir=data_dir, include_lb_to_ulb=include_lb_to_ulb, text_weak_aug=text_weak_aug, text_strong_aug=text_strong_aug, load_labeled=load_labeled)
     else:
         return None

@@ -171,7 +171,7 @@ def get_collactor(args, net):
     elif net == 'hubert_base':
         from semilearn.datasets.collactors import get_hubert_base_collactor
         collact_fn = get_hubert_base_collactor(args.max_length_seconds, args.sample_rate)
-    elif net == 'longformer_base':
+    elif net in ['longformer_base', 'longformer_base_multihead']:
         from semilearn.datasets.collactors import get_longformer_base_collactor
         collact_fn = get_longformer_base_collactor(args.max_length)
     else:

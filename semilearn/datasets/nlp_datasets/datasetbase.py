@@ -157,7 +157,10 @@ class LLMSafetyDataset(Dataset):
                 return {'idx':idx, 'text':sen[0], 'text_s':sen[indices[0]], 'text_s_':sen[indices[1]]}
             else:
                 # 0 - original, 1 - weak aug list, 2 - strong aug list
-                return {'idx':idx, 'text': random.choice(sen[1]), 'text_s': random.choice(sen[2])}
+                d = {'idx':idx, 'text': random.choice(sen[1]), 'text_s': random.choice(sen[2])}
+                d['ulb_label'] = -1 if target is None else target
+                return d
+                
             
     def __len__(self):
         return len(self.data)
