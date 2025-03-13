@@ -480,6 +480,8 @@ class AlgorithmBase:
 
         self.model.load_state_dict(checkpoint["model"])
         self.ema_model.load_state_dict(checkpoint["ema_model"])
+        if self.ema:
+            self.ema.load(self.ema_model)
         self.loss_scaler.load_state_dict(checkpoint["loss_scaler"])
         self.it = checkpoint["it"]
         self.start_epoch = checkpoint["epoch"]
