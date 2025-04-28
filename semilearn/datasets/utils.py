@@ -146,10 +146,10 @@ def make_imbalance_data(max_num_labels, num_classes, gamma):
 
 
 def get_collactor(args, net):
-    if net in ['bert_base_uncased', 'bert_base_uncased_multihead', 'bert_base_uncased_multihead_light', 'bert_base_uncased_multihead_heavy']:
+    if net in ['bert_base_uncased', 'bert_base_uncased_multihead', 'bert_base_uncased_multihead_light', 'bert_base_uncased_multihead_heavy', 'bert_base_uncased_multinet']:
         from semilearn.datasets.collactors import get_bert_base_uncased_collactor
         collact_fn = get_bert_base_uncased_collactor(args.max_length)
-    elif net in ['bert_base_cased', 'bert_base_cased_multihead', 'bert_base_cased_multihead_light', 'bert_base_cased_multihead_heavy']:
+    elif net in ['bert_base_cased', 'bert_base_cased_multihead', 'bert_base_cased_multihead_light', 'bert_base_cased_multihead_heavy', 'bert_base_cased_multinet']:
         from semilearn.datasets.collactors import get_bert_base_cased_collactor
         collact_fn = get_bert_base_cased_collactor(args.max_length)
     elif net == 'wave2vecv2_base':
