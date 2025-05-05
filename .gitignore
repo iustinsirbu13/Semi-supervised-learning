@@ -140,3 +140,10 @@ dmypy.json
 
 # MacOS system file
 .DS_Store
+
+# Apptainer images
+*.sif
+
+# Slurm outputs
+*.out
+debug/
