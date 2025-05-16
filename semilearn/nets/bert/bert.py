@@ -72,3 +72,13 @@ def bert_base_cased(pretrained=True, pretrained_path=None, **kwargs):
 def bert_base_uncased(pretrained=True, pretrained_path=None, **kwargs):
     model = ClassificationBert(name='bert-base-uncased', **kwargs)
     return model
+
+
+def bert_base_cased_ro(pretrained=True, pretrained_path=None, **kwargs):
+    model = ClassificationBert(name='dumitrescustefan/bert-base-romanian-cased-v1', **kwargs)
+    return model
+
+
+def bert_base_uncased_ro(pretrained=True, pretrained_path=None, **kwargs):
+    model = ClassificationBert(name='dumitrescustefan/bert-base-romanian-uncased-v1', **kwargs)
+    return model

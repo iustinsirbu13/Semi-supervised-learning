@@ -177,7 +177,7 @@ def get_json_dset_aug_list(args, alg='fixmatch', dataset='acmIb', num_labels=40,
 
         # output the distribution of labeled data for remixmatch
         count = [0 for _ in range(num_classes)]
-        for c in train_label_list:
+        for c in lb_label_list:
             count[c] += 1
         dist = np.array(count, dtype=float)
         dist = dist / dist.sum()

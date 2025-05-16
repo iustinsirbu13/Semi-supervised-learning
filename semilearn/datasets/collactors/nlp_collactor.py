@@ -148,3 +148,13 @@ def get_longformer_base_collactor(max_length):
     tokenizer = LongformerTokenizerFast.from_pretrained('allenai/longformer-base-4096', truncation_side='left')
     collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
     return collact_fn
+
+def get_bert_base_uncased_ro_collactor(max_length=512):
+    tokenizer = BertTokenizerFast.from_pretrained('dumitrescustefan/bert-base-romanian-uncased-v1', truncation_side='right')
+    collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
+    return collact_fn
+
+def get_bert_base_cased_ro_collactor(max_length=512):
+    tokenizer = BertTokenizerFast.from_pretrained('dumitrescustefan/bert-base-romanian-cased-v1', truncation_side='right')
+    collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
+    return collact_fn

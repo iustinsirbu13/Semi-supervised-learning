@@ -470,13 +470,15 @@ class AlgorithmBase:
         checkpoint = torch.load(load_path, map_location='cpu')
         self.model.load_state_dict(checkpoint['model'])
         self.ema_model.load_state_dict(checkpoint['ema_model'])
+        if self.ema:
+            self.ema.load(self.ema_model)
         self.loss_scaler.load_state_dict(checkpoint['loss_scaler'])
         self.it = checkpoint['it']
         self.start_epoch = checkpoint['epoch']
         self.epoch = self.start_epoch
         self.best_it = checkpoint['best_it']
         self.best_eval_acc = checkpoint['best_eval_acc']
-        # self.best_eval_F1_1 = checkpoint['best_eval_F1_1']
+        self.best_eval_F1_1 = checkpoint['best_eval_F1_1']
         self.optimizer.load_state_dict(checkpoint['optimizer'])
         if self.scheduler is not None and 'scheduler' in checkpoint:
             self.scheduler.load_state_dict(checkpoint['scheduler'])
