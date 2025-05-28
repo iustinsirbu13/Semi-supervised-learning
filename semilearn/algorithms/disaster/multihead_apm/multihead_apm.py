@@ -13,6 +13,7 @@ from semilearn.core.utils import ALGORITHMS
 @ALGORITHMS.register('multihead_apm')
 class MultiheadAPM(AlgorithmBase):
     def __init__(self, args, net_builder, tb_log=None, logger=None):
+        print('INITIALIZE MULTIHEAD_APM')
         self.use_debug = args.use_debug
 
         super().__init__(args, net_builder, tb_log, logger) 

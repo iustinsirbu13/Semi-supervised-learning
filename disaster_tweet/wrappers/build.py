@@ -16,6 +16,8 @@ class ALGO_WRAPPERS:
     MULTIHEAD_APM = 'multihead_apm'
     MULTIHEAD_APM_MMBT_BERT = 'multihead_apm_mmbt_bert'
 
+    MULTIMATCH_MMBT_BERT = 'multimatch_mmbt_bert'
+
 
 def build_wrapper(dataset, algorithm, config, build_algo=True):
     if dataset not in ['disaster']:
@@ -90,6 +92,10 @@ def build_wrapper(dataset, algorithm, config, build_algo=True):
     elif algorithm == ALGO_WRAPPERS.MULTIHEAD_APM_MMBT_BERT:
         from disaster_tweet.wrappers.multihead_apm.multihead_apm_mmbt_bert_wrapper import MultiheadAPMMMBTBertWrapper
         return MultiheadAPMMMBTBertWrapper(config, build_algo)
+
+    elif algorithm == ALGO_WRAPPERS.MULTIMATCH_MMBT_BERT:
+        from disaster_tweet.wrappers.multihead_apm.multimatch_mmbt_bert_wrapper import MultiMatchMMBTBertWrapper
+        return MultiMatchMMBTBertWrapper(config, build_algo)
     
     raise Exception(f'Unknown disaster algorithm: {algorithm}')
     

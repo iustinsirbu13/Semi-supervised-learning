@@ -6,6 +6,7 @@ from semilearn.core.utils import ALGORITHMS
 @ALGORITHMS.register('multihead_apm_mmbt_bert')
 class MultiheadAPMMMBTBert(MultiheadAPM):
     def __init__(self, args, net_builder, tb_log=None, logger=None):
+        print('INITIALIZE MULTIHEAD_APM_MMBT_BERT')
         super().__init__(args, net_builder, tb_log, logger)
 
     # @overrides
