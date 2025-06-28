@@ -18,8 +18,11 @@ class EvaluationHook(Hook):
             algorithm.log_dict.update(eval_dict)
 
             # update best metrics
-            if algorithm.log_dict['eval/F1-1'] > algorithm.best_eval_F1_1:
+            if algorithm.args.eval_metric == 'F1-1' and algorithm.log_dict['eval/F1-1'] > algorithm.best_eval_F1_1:
                 algorithm.best_eval_F1_1 = algorithm.log_dict['eval/F1-1']
+                algorithm.best_it = algorithm.it
+            elif algorithm.args.eval_metric == 'accuracy' and algorithm.log_dict['eval/top-1-acc'] > algorithm.best_eval_acc:
+                algorithm.best_eval_acc = algorithm.log_dict['eval/top-1-acc']
                 algorithm.best_it = algorithm.it
     
     def after_run(self, algorithm):
@@ -28,13 +31,19 @@ class EvaluationHook(Hook):
             save_path = os.path.join(algorithm.save_dir, algorithm.save_name)
             algorithm.save_model('latest_model.pth', save_path)
 
-        results_dict = {'eval/best_F1_1': algorithm.best_eval_F1_1, 'eval/best_it': algorithm.best_it}
+        results_dict = {'eval/best_it': algorithm.best_it}
+        if algorithm.args.eval_metric == 'F1-1':
+            results_dict['eval/best_F1_1'] = algorithm.best_eval_F1_1
+        elif algorithm.args.eval_metric == 'accuracy':
+            results_dict['eval/best_acc'] = algorithm.best_eval_acc
+
         if 'test' in algorithm.loader_dict:
             # load the best model and evaluate on test dataset
             best_model_path = os.path.join(algorithm.args.save_dir, algorithm.args.save_name, 'model_best.pth')
             algorithm.load_model(best_model_path)
             test_dict = algorithm.evaluate('test')
             algorithm.print_fn(f'test_dict: {test_dict}')
+            results_dict['test/best_acc'] = test_dict['test/top-1-acc']
             results_dict['test/best_F1_1'] = test_dict['test/F1-1']
         algorithm.results_dict = results_dict
         

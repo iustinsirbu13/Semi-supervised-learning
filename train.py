@@ -103,6 +103,13 @@ def get_config():
         help="batch size of evaluation data loader (it does not affect the accuracy)",
     )
     parser.add_argument(
+        "--eval_metric",
+        type=str,
+        default='F1-1',
+        choices=['F1-1', 'accuracy'],
+        help="the metric used for choosing the best model on the validation set",
+    )
+    parser.add_argument(
         "--ema_m", type=float, default=0.999, help="ema momentum for eval_model"
     )
     parser.add_argument("--ulb_loss_ratio", type=float, default=1.0)

@@ -83,3 +83,13 @@ def bert_base_cased_multihead(args, **kwargs):
 def bert_base_uncased_multihead(args, **kwargs):
     model = ClassificationBertMultihead('bert-base-uncased', args.num_classes, args.num_heads, args.adjust_clf_size, **kwargs)
     return model
+
+
+def bert_base_cased_ro_multihead(args, **kwargs):
+    model = ClassificationBertMultihead('dumitrescustefan/bert-base-romanian-cased-v1', args.num_classes, args.num_heads, args.adjust_clf_size, **kwargs)
+    return model
+
+
+def bert_base_uncased_ro_multihead(args, **kwargs):
+    model = ClassificationBertMultihead('dumitrescustefan/bert-base-romanian-uncased-v1', args.num_classes, args.num_heads, args.adjust_clf_size, **kwargs)
+    return model

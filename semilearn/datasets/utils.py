@@ -165,10 +165,10 @@ def get_collactor(args, net):
     elif net in ['bert_base_cased', 'bert_base_cased_multihead']:
         from semilearn.datasets.collactors import get_bert_base_cased_collactor
         collact_fn = get_bert_base_cased_collactor(args.max_length)
-    elif net in ['bert_base_uncased_ro']:
+    elif net in ['bert_base_uncased_ro', 'bert_base_uncased_ro_multihead']:
         from semilearn.datasets.collactors import get_bert_base_uncased_ro_collactor
         collact_fn = get_bert_base_uncased_ro_collactor(args.max_length)
-    elif net in ['bert_base_cased_ro']:
+    elif net in ['bert_base_cased_ro', 'bert_base_cased_ro_multihead']:
         from semilearn.datasets.collactors import get_bert_base_cased_ro_collactor
         collact_fn = get_bert_base_cased_ro_collactor(args.max_length)
     elif net == 'wave2vecv2_base':
