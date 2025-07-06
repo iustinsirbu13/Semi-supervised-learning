@@ -2,7 +2,7 @@ algorithm: supervised
 save_dir: ./saved_models/usb_llm_safety
 save_name: supervised_wildguardmix_PH_200_eda
 resume: True
-load_path: ./saved_models/usb_llm_safety/supervised_wildguardmix_PH_200_eda_seed/latest_model.pth
+load_path: ./saved_models/usb_llm_safety/supervised_wildguardmix_PH_200_eda/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: False

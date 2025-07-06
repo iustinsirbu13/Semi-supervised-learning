@@ -1,8 +1,8 @@
 algorithm: multimatch
 save_dir: ./saved_models/usb_llm_safety/multimatch
-save_name: multimatch_wildguard_PH_200_eda_ulbratio_1_seed123
+save_name: multimatch_wildguard_PH_200_eda_ulbratio_1_seed123_uratio3
 resume: True
-load_path: ./saved_models/usb_llm_safety/multimatch/multimatch_wildguard_PH_200_eda_ulbratio_1_seed123/latest_model.pth
+load_path: ./saved_models/usb_llm_safety/multimatch/multimatch_wildguard_PH_200_eda_ulbratio_1_seed123_uratio3/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: False
@@ -28,7 +28,7 @@ apm_disagreement_weight: 3
 threshold_algo: freematch
 apm_cutoff: 0.0
 smoothness: 0.997
-uratio: 1
+uratio: 3
 use_cat: False
 optim: AdamW
 lr: 0.00005
@@ -54,3 +54,4 @@ dist_backend: nccl
 gpu: 0
 text_weak_aug: eda_synonym
 text_strong_aug: eda_full
+save_pseudolabels_stats: True

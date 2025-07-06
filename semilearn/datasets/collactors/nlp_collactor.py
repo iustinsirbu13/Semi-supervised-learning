@@ -4,7 +4,7 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, NewType, Optional, Tuple, Union
 
-from transformers import BertTokenizer, BertTokenizerFast, LongformerTokenizerFast
+from transformers import BertTokenizer, BertTokenizerFast, LongformerTokenizerFast, AutoTokenizer, DebertaV2TokenizerFast, DebertaV2Tokenizer
 from transformers.file_utils import PaddingStrategy
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.data import default_data_collator
@@ -57,12 +57,12 @@ class DataCollatorWithPadding:
             else:
                 input_ids = self.tokenizer(f['text'], max_length=self.max_length, truncation=True, padding=False)['input_ids']
             Max = max(Max, len(input_ids))
-
+           
             f_['input_ids'] = input_ids 
             w_features.append(f_)
-
             if 'text_s' in f:
                 if isinstance(f['text_s'], np.ndarray) or isinstance(f['text_s'], list) or isinstance(f['text_s'], tuple):
+                    # raise Exception(f"{f['text']}\n. {f['text_s']}")
                     try:
                         input_ids_s = self.tokenizer.encode_plus(f['text_s'][0], f['text_s'][1], max_length=self.max_length, truncation="only_first", padding=False)['input_ids']
                     except:
@@ -72,7 +72,7 @@ class DataCollatorWithPadding:
                 s_features.append({'input_ids':input_ids_s})
 
             if 'text_s_' in f:
-                if isinstance(f['text_s_'], np.ndarray) or isinstance(f['text_s_'], list) or isinstance(f['text_s'], tuple):
+                if isinstance(f['text_s_'], np.ndarray) or isinstance(f['text_s_'], list) or isinstance(f['text_s_'], tuple):
                     try:
                         input_ids_s_ = self.tokenizer.encode_plus(f['text_s_'][0], f['text_s_'][1], max_length=self.max_length, truncation="only_first", padding=False)['input_ids']
                     except:
@@ -144,7 +144,20 @@ def get_bert_base_cased_collactor(max_length=512):
     return collact_fn
 
 
-def get_longformer_base_collactor(max_length):
+def get_longformer_base_collactor(max_length=512):
     tokenizer = LongformerTokenizerFast.from_pretrained('allenai/longformer-base-4096', truncation_side='left')
+    collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
+    return collact_fn
+
+def get_hate_bert_collactor(max_length=512):
+    print("GOT HATE BERT TOKENIZER\n", flush=True)
+    max_length = int(max_length)
+    tokenizer = BertTokenizerFast.from_pretrained("unitary/toxic-bert", truncation_side='left')
+    # tokenizer = AutoTokenizer.from_pretrained("GroNLP/hateBERT")
+    collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
+    return collact_fn
+
+def get_deberta_collactor(max_length=512):
+    tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-v3-base', truncation_side='left')
     collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
     return collact_fn

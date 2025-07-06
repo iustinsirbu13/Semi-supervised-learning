@@ -8,7 +8,7 @@ import numpy as np
 from inspect import signature
 from collections import OrderedDict
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, top_k_accuracy_score, classification_report, roc_auc_score
-
+import traceback
 import torch
 import torch.nn.functional as F
 from torch.cuda.amp import autocast, GradScaler
@@ -314,14 +314,13 @@ class AlgorithmBase:
             
             self.call_hook("before_train_epoch")
 
+            
             for data_lb, data_ulb in zip(self.loader_dict['train_lb'],
                                          self.loader_dict['train_ulb']):
                 # prevent the training iterations exceed args.num_train_iter
                 if self.it >= self.num_train_iter or self._reached_early_stopping():
                     break
-
                 self.call_hook("before_train_step")
-
                 self.out_dict, self.log_dict = self.train_step(**self.process_batch(**data_lb, **data_ulb))
                 self.call_hook("after_train_step")
                 self.it += 1
@@ -347,8 +346,21 @@ class AlgorithmBase:
         """
         evaluation function
         """
+        # if eval_dest == 'test':
+        #      with open("test_model_latestt", 'w') as f:
+        #         f.write(str(next(self.model.parameters()).dtype) + "\n")
+        #         f.write(str(self.model.state_dict()) + "\n")
         self.model.eval()
+        # if eval_dest == 'test':
+        #      with open("test_model_after_eval_latest", 'w') as f:
+        #         f.write(str(next(self.model.parameters()).dtype) + "\n")
+        #         f.write(str(self.model.state_dict()) + "\n")
+        # print(self.ema)
         self.ema.apply_shadow()
+        if eval_dest == 'test':
+             save_path = os.path.join(self.save_dir, self.save_name)
+             self.save_model('test.pth', save_path)
+        print(f'Model address from load model {id(self.model)}', flush=True)
 
         eval_loader = self.loader_dict[eval_dest]
         total_loss = 0.0
@@ -357,6 +369,9 @@ class AlgorithmBase:
         y_pred = []
         y_probs = []
         y_logits = []
+
+        eval_examples = []
+
         with torch.no_grad():
             for data in eval_loader:
                 logits = self.get_logits(data, out_key)
@@ -364,17 +379,52 @@ class AlgorithmBase:
 
                 num_batch = y.shape[0]
                 total_num += num_batch
-                
+
+                # batch_examples = data.get('x_lb', {}).get('input_ids', None).tolist()
+                # batch_y_true = y.cpu().tolist()
+                # batch_y_pred = torch.max(logits, dim=-1)[1].cpu().tolist()
+
                 loss = F.cross_entropy(logits, y, reduction='mean', ignore_index=-1)
                 y_true.extend(y.cpu().tolist())
                 y_pred.extend(torch.max(logits, dim=-1)[1].cpu().tolist())
                 y_logits.append(logits.cpu().numpy())
                 y_probs.extend(torch.softmax(logits, dim=-1).cpu().tolist())
                 total_loss += loss.item() * num_batch
+
+                # for ex, true_label, pred_label in zip(batch_examples, batch_y_true, batch_y_pred):
+                #     eval_examples.append({
+                #         'example': ex,
+                #         'true_label': true_label,
+                #         'pred_label': pred_label
+                #     })
         
+        print(y_true, flush=True)
+        print(y_pred, flush=True)
         y_true = np.array(y_true)
         y_pred = np.array(y_pred)
         y_logits = np.concatenate(y_logits)
+
+        dataset = ""
+        if self.save_name in ['multimatch_wildguard_RH_2000_deberta_translate_seed_0', 'supervised_wildguardmix_RH_2000_translate_hate_seed_0_deberta']:
+            dataset = 'wildguardmix_RH_translate_MarianMT'
+        else:
+            dataset = 'wildguardmix_PH_translate_MarianMT_test'
+
+        with open(f"./data/{dataset}/test.json", "r") as f:
+            original_data = json.load(f)
+
+        updated_data = {}
+        for idx, pred_label in enumerate(y_pred):
+            entry = original_data[str(idx)]
+            updated_entry = {
+                "ori": entry["ori"],
+                "label": entry["label"],
+                "predicted_label": str(pred_label)
+            }
+            updated_data[str(idx)] = updated_entry
+
+        with open(f"./data/{dataset}/predicted_{self.save_name}.json", "w") as f:
+            json.dump(updated_data, f, indent=4)
 
         if self.force_binary_class:
             y_true = np.where(y_true == 0, 0, 1)
@@ -427,6 +477,10 @@ class AlgorithmBase:
 
         if return_logits:
             eval_dict[eval_dest+'/logits'] = y_logits
+        
+        # with open(eval_dest + "_results.json", 'w') as f:
+        #     json.dump(eval_examples, f, indent=4)
+
         return eval_dict
 
 
@@ -467,20 +521,23 @@ class AlgorithmBase:
         """
         load model and specified parameters for resume
         """
-        checkpoint = torch.load(load_path, map_location='cpu')
+        checkpoint = torch.load(load_path, map_location='cuda')
+        # print(f'Model address from load model {id(self.model)}', flush=True)
         self.model.load_state_dict(checkpoint['model'])
         self.ema_model.load_state_dict(checkpoint['ema_model'])
+        if self.ema:
+            self.ema.load(self.ema_model)
         self.loss_scaler.load_state_dict(checkpoint['loss_scaler'])
         self.it = checkpoint['it']
         self.start_epoch = checkpoint['epoch']
         self.epoch = self.start_epoch
         self.best_it = checkpoint['best_it']
         self.best_eval_acc = checkpoint['best_eval_acc']
-        # self.best_eval_F1_1 = checkpoint['best_eval_F1_1']
+        self.best_eval_F1_1 = checkpoint['best_eval_F1_1']
         self.optimizer.load_state_dict(checkpoint['optimizer'])
         if self.scheduler is not None and 'scheduler' in checkpoint:
             self.scheduler.load_state_dict(checkpoint['scheduler'])
-        self.print_fn('Model loaded')
+        self.print_fn(f'Model loaded from {load_path}')
         return checkpoint
 
     def check_prefix_state_dict(self, state_dict):

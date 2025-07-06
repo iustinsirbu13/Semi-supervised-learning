@@ -1,8 +1,8 @@
 algorithm: multimatch
 save_dir: ./saved_models/usb_llm_safety/multimatch
-save_name: multimatch_wildguard_PH_200_eda_ulbratio_10_seed123
+save_name: multimatch_wildguard_PH_200_translate_deberta_seed_1_translate_paraphrase
 resume: True
-load_path: ./saved_models/usb_llm_safety/multimatch/multimatch_wildguard_PH_200_eda_ulbratio_10_seed123/model_best.pth
+load_path: ./saved_models/usb_llm_safety/multimatch/multimatch_wildguard_PH_200_translate_deberta_seed_1_translate_paraphrase/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: False
@@ -18,7 +18,7 @@ ema_m: 0.0
 hard_label: True
 T: 0.5
 p_cutoff: 0.95
-ulb_loss_ratio: 3.0
+ulb_loss_ratio: 1.0
 num_heads: 3
 use_agreement_apm: True
 apm_percentile: 0.05
@@ -37,7 +37,7 @@ weight_decay: 0.0005
 layer_decay: 0.75
 amp: False
 clip: 0.0
-net: bert_base_uncased_multihead
+net: deberta_v3_base_multihead
 net_from_name: False
 data_dir: ./data
 dataset: OAIMod_PH

@@ -3,4 +3,4 @@
 
 from .nlp_collactor import get_bert_base_uncased_collactor, get_bert_base_cased_collactor
 from .audio_collactor import get_wave2vecv2_base_collactor, get_hubert_base_collactor
-from .nlp_collactor import get_longformer_base_collactor
+from .nlp_collactor import get_longformer_base_collactor, get_hate_bert_collactor, get_deberta_collactor

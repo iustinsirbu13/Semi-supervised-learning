@@ -4,7 +4,8 @@
 
 import os
 from .hook import Hook
-
+import traceback
+import time
 
 class EvaluationHook(Hook):
     """
@@ -16,7 +17,7 @@ class EvaluationHook(Hook):
             algorithm.print_fn("validating...")
             eval_dict = algorithm.evaluate('eval')
             algorithm.log_dict.update(eval_dict)
-
+            
             # update best metrics
             if algorithm.log_dict['eval/F1-1'] > algorithm.best_eval_F1_1:
                 algorithm.best_eval_F1_1 = algorithm.log_dict['eval/F1-1']
@@ -26,13 +27,25 @@ class EvaluationHook(Hook):
         
         if not algorithm.args.multiprocessing_distributed or (algorithm.args.multiprocessing_distributed and algorithm.args.rank % algorithm.ngpus_per_node == 0):
             save_path = os.path.join(algorithm.save_dir, algorithm.save_name)
+            # DONT FORGET TO CHANGE THIS BACK
             algorithm.save_model('latest_model.pth', save_path)
 
         results_dict = {'eval/best_F1_1': algorithm.best_eval_F1_1, 'eval/best_it': algorithm.best_it}
         if 'test' in algorithm.loader_dict:
             # load the best model and evaluate on test dataset
             best_model_path = os.path.join(algorithm.args.save_dir, algorithm.args.save_name, 'model_best.pth')
+
+            # with open("before_load_test_latest", 'w') as f:
+            #     f.write(str(next(algorithm.model.parameters()).dtype) + "\n")
+            #     f.write(str(algorithm.model.state_dict()) + "\n")
+            
             algorithm.load_model(best_model_path)
+            
+            # with open("after_load_test_latest", 'w') as f:
+            #     f.write(str(next(algorithm.model.parameters()).dtype) + "\n")
+            #     f.write(str(algorithm.model.state_dict()) + "\n")
+            
+            # print(f'Model address from evaluation hook {id(algorithm.model)}', flush=True)
             test_dict = algorithm.evaluate('test')
             algorithm.print_fn(f'test_dict: {test_dict}')
             results_dict['test/best_F1_1'] = test_dict['test/F1-1']

@@ -47,6 +47,7 @@ rank: 0
 multiprocessing_distributed: False
 dist_url: tcp://127.0.0.1:10013
 dist_backend: nccl
-gpu: 0
+gpu: None
 text_weak_aug: eda_synonym
 text_strong_aug: eda_full
+save_pseudolabels_stats: True

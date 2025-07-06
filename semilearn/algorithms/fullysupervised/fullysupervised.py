@@ -29,6 +29,8 @@ class FullySupervised(AlgorithmBase):
         with self.amp_cm():
 
             logits_x_lb = self.model(x_lb)['logits']
+            # print(logits_x_lb, flush=True)
+            # print(y_lb, flush=True)
             sup_loss = self.ce_loss(logits_x_lb, y_lb, reduction='mean')
 
         out_dict = self.process_out_dict(loss=sup_loss)

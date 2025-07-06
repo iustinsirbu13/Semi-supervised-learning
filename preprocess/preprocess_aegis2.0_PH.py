@@ -25,7 +25,7 @@ def process_split(ds, label_column, cat_column):
     return ds
 
 def format_as_json():
-    dst_path = './data/aegis2.0_PH'
+    dst_path = './data/aegis2.0_PH_2'
     text_column = 'prompt'
     cat_column = 'violated_categories'
     label_column = 'prompt_label'
@@ -45,16 +45,16 @@ def format_as_json():
     ds_train = process_split(ds_train, label_column, cat_column)
     print(ds_train.shape)
 
-    ds_valid = process_split(ds_valid, label_column, cat_column)
+    # ds_valid = process_split(ds_valid, label_column, cat_column)
     print(ds_valid.shape)
 
-    ds_test = process_split(ds_test, label_column, cat_column)
+    # ds_test = process_split(ds_test, label_column, cat_column)
     print(ds_test.shape)
 
     datasets = {
        'test': ds_test,
        'dev' : ds_valid,
-       'train_lb': ds_train
+       'train': ds_train
     }
 
     langs = Counter()
@@ -80,7 +80,7 @@ def format_as_json():
                 except Exception as e:
                     print(f"Label not in dictionary: {elem[cat_column]}")
                     raise e
-                if split_name in ['train', 'train_lb', 'train_ulb']:
+                if split_name in []:
                     if len(data[str(idx)]['ori']) == 0:
                         continue
                     probs = [0.1, 0.1, 0.1, 0.1]

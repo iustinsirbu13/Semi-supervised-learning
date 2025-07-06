@@ -1,8 +1,8 @@
 algorithm: fixmatch
 save_dir: ./saved_models/usb_llm_safety
-save_name: multimatch_wildguard_PH_2000_eda
+save_name: fixmatch_wildguardmix_PH_200_eda_ulbratio_1_seed1234
 resume: True
-load_path: ./saved_models/usb_llm_safety/multimatch/multimatch_wildguard_PH_2000_eda/model_best.pth
+load_path: ./saved_models/usb_llm_safety/multimatch/fixmatch_wildguardmix_PH_200_eda_ulbratio_1_seed1234/model_best.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: False

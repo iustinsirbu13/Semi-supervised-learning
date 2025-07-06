@@ -8,3 +8,5 @@ from .bert import bert_base_cased, bert_base_uncased, bert_base_cased_multihead,
 from .wave2vecv2 import wave2vecv2_base
 from .hubert import hubert_base
 from .longformer import longformer_base, longformer_large, longformer_base_multihead, longformer_large_multihead
+from .hatebert import hate_bert
+from .deberta import deberta_v3_base, deberta_v3_base_multihead

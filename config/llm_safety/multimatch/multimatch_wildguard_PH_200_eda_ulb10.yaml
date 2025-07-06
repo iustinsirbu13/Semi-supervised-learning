@@ -54,3 +54,4 @@ dist_backend: nccl
 gpu: 0
 text_weak_aug: eda_synonym
 text_strong_aug: eda_full
+save_pseudolabels_stats: True

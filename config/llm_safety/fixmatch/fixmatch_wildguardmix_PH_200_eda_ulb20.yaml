@@ -1,12 +1,12 @@
 algorithm: fixmatch
 save_dir: ./saved_models/usb_llm_safety
-save_name: fixmatch_wildguardmix_PH_200_eda_ulbratio_20_seed123
+save_name: fixmatch_wildguardmix_PH_200_eda_ulbratio_20_seed123_test
 resume: True
-load_path: ./saved_models/usb_llm_safety/fixmatch_wildguardmix_PH_200_eda_ulbratio_20_seed123/model_best.pth
+load_path: ./saved_models/usb_llm_safety/fixmatch_wildguardmix_PH_200_eda_ulbratio_20_seed123_test/model_best.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: False
-epoch: 1
+epoch: 100
 num_train_iter: 1300
 num_warmup_iter: 13
 num_log_iter: 5
@@ -42,7 +42,7 @@ rank: 0
 multiprocessing_distributed: False
 dist_url: tcp://127.0.0.1:10008
 dist_backend: nccl
-gpu: None
+gpu: 0
 include_lb_to_ulb: False
 text_weak_aug: eda_synonym
 text_strong_aug: eda_full

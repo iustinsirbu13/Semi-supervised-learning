@@ -18,7 +18,7 @@ from semilearn.core.utils import ALGORITHMS
 from semilearn.algorithms.hooks import PseudoLabelingHook
 from semilearn.algorithms.utils import SSL_Argument, str2bool
 
-# import jsonlines
+import jsonlines
 import os
 
 @ALGORITHMS.register('marginmatch')
@@ -187,8 +187,8 @@ class MarginMatch(AlgorithmBase):
     def _my_stats_log(self, d):
         d['epoch'] = self.epoch
         d['it'] = self.it
-        # with jsonlines.open(os.path.join(self.args.save_dir, self.args.save_name, 'my_stats.jsonl'), mode='a') as writer:
-        #     writer.write(d)
+        with jsonlines.open(os.path.join(self.args.save_dir, self.args.save_name, 'my_stats.jsonl'), mode='a') as writer:
+            writer.write(d)
 
     @staticmethod
     def get_argument():

@@ -1,8 +1,8 @@
 algorithm: multimatch
 save_dir: ./saved_models/usb_llm_safety/multimatch
-save_name: multimatch_wildguard_PH_200_eda
+save_name: multimatch_wildguard_PH_200_translate_deberta_seed_0
 resume: True
-load_path: ./saved_models/usb_llm_safety/multimatch/multimatch_wildguard_PH_200_eda/latest_model.pth
+load_path: ./saved_models/usb_llm_safety/multimatch/multimatch_wildguard_PH_200_translate_deberta_seed_0/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: False
@@ -28,7 +28,7 @@ apm_disagreement_weight: 3
 threshold_algo: freematch
 apm_cutoff: 0.0
 smoothness: 0.997
-uratio: 1
+uratio: 3
 use_cat: False
 optim: AdamW
 lr: 0.00005
@@ -45,7 +45,7 @@ train_sampler: RandomSampler
 num_classes: 2
 num_workers: 4
 max_length: 512
-seed: 1
+seed: 0
 world_size: 1
 rank: 0
 multiprocessing_distributed: False

@@ -97,6 +97,7 @@ def get_json_dset_aug_list(args, alg='fixmatch', dataset='acmIb', num_labels=40,
         Returns:
             BasicDataset (for labeled data), BasicDataset (for unlabeled data)
         """
+        print(f"NUMBER OF CLASSES {num_classes}", flush=True)
         json_dir = os.path.join(data_dir, dataset)
         if load_labeled:
             with open(os.path.join(json_dir,'train_lb.json'),'r') as json_data:
@@ -104,7 +105,7 @@ def get_json_dset_aug_list(args, alg='fixmatch', dataset='acmIb', num_labels=40,
                 lb_sen_list = []
                 lb_label_list = []
                 for idx in train_lb_data:
-                    lb_sen_list.append((train_lb_data[idx]['ori'],train_lb_data[idx][text_weak_aug],train_lb_data[idx][text_strong_aug]))
+                    lb_sen_list.append((train_lb_data[idx]['ori'],'None','None'))
                     lb_label_list.append(int(train_lb_data[idx]['label']))
             
             with open(os.path.join(json_dir,'train_ulb.json'),'r') as json_data:
@@ -138,9 +139,11 @@ def get_json_dset_aug_list(args, alg='fixmatch', dataset='acmIb', num_labels=40,
                 train_data = json.load(json_data)
                 train_sen_list = []
                 train_label_list = []
+                # train_cat_list = []
                 for idx in train_data:
                     train_sen_list.append((train_data[idx]['ori'],train_data[idx][text_weak_aug],train_data[idx][text_strong_aug]))
                     train_label_list.append(int(train_data[idx]['label']))
+                    # train_cat_list.append(int(train_data[idx]['cat']))
             with open(os.path.join(json_dir,'dev.json'),'r') as json_data:
                 dev_data = json.load(json_data)
                 dev_sen_list = []
@@ -162,7 +165,7 @@ def get_json_dset_aug_list(args, alg='fixmatch', dataset='acmIb', num_labels=40,
                 return lb_dset, None, dev_dset, test_dset
             include_lb_to_ulb = False
             
-            lb_sen_list, lb_label_list, ulb_sen_list, ulb_label_list = split_ssl_data(args, train_sen_list, train_label_list, num_classes, 
+            lb_sen_list, lb_label_list, ulb_sen_list, ulb_label_list = split_ssl_data(args, train_sen_list, train_label_list, num_classes, None,
                                                                     lb_num_labels=num_labels,
                                                                     ulb_num_labels=args.ulb_num_labels,
                                                                     lb_imbalance_ratio=args.lb_imb_ratio,
@@ -191,4 +194,5 @@ def get_json_dset_aug_list(args, alg='fixmatch', dataset='acmIb', num_labels=40,
             json.dump(out, w)
         lb_dset = LLMSafetyDataset(alg, lb_sen_list, lb_label_list, num_classes, False, onehot)
         ulb_dset = LLMSafetyDataset(alg, ulb_sen_list, ulb_label_list, num_classes, True, onehot)
+        print("unique labels:", sorted(set(lb_dset.targets)))
         return lb_dset, ulb_dset, dev_dset, test_dset

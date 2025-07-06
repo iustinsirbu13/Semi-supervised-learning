@@ -8,12 +8,13 @@ import torch
 from torch.utils.data import sampler, DataLoader
 import torch.distributed as dist
 from io import BytesIO
+import math
 
 # TODO: better way
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
-def split_ssl_data(args, data, targets, num_classes,
+def split_ssl_data(args, data, targets, num_classes, cats,
                    lb_num_labels, ulb_num_labels=None,
                    lb_imbalance_ratio=1.0, ulb_imbalance_ratio=1.0,
                    lb_index=None, ulb_index=None, include_lb_to_ulb=True, load_exist=True):
@@ -36,10 +37,21 @@ def split_ssl_data(args, data, targets, num_classes,
         include_lb_to_ulb: If True, labeled data is also included in unlabeled data
     """
     targets = np.array(targets)
-    lb_idx, ulb_idx = sample_labeled_unlabeled_data(args, data, targets, num_classes, 
+    cats = np.array(cats)
+    lb_idx, ulb_idx = sample_labeled_unlabeled_data(args, data, targets, num_classes, cats,
                                                     lb_num_labels, ulb_num_labels,
-                                                    lb_imbalance_ratio, ulb_imbalance_ratio, load_exist=False)
-    
+                                                    lb_imbalance_ratio, ulb_imbalance_ratio, load_exist=True)
+    # print(targets[lb_idx])
+    # print(len(targets[lb_idx]))
+    # unique_values, counts = np.unique(targets[lb_idx], return_counts=True)
+    # print("Count in targets:\n")
+    # print(unique_values)
+    # print(counts)
+
+    # print("Count in cats")
+    # unique_values, counts = np.unique(cats[lb_idx], return_counts=True)
+    # print(unique_values)
+    # print(counts)
     # manually set lb_idx and ulb_idx, do not use except for debug
     if lb_index is not None:
         lb_idx = lb_index
@@ -55,7 +67,7 @@ def split_ssl_data(args, data, targets, num_classes,
     return lb_data, targets[lb_idx], ulb_data, targets[ulb_idx]
 
 
-def sample_labeled_unlabeled_data(args, data, target, num_classes,
+def sample_labeled_unlabeled_data(args, data, target, num_classes, cats,
                                   lb_num_labels, ulb_num_labels=None,
                                   lb_imbalance_ratio=1.0, ulb_imbalance_ratio=1.0,
                                   load_exist=True):
@@ -69,10 +81,21 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
     os.chmod(dump_dir, 0o777)
     lb_dump_path = os.path.join(dump_dir, f'lb_labels{args.num_labels}_{args.lb_imb_ratio}_seed{args.seed}_idx.npy')
     ulb_dump_path = os.path.join(dump_dir, f'ulb_labels{args.num_labels}_{args.ulb_imb_ratio}_seed{args.seed}_idx.npy')
+    
+    # print(lb_dump_path)
+    # print("\n")
+    # print(ulb_dump_path)
+    # print("\n")
+    # print(load_exist)
+    # print(os.path.exists(lb_dump_path))
+    # print(os.path.exists(ulb_dump_path))
 
     if os.path.exists(lb_dump_path) and os.path.exists(ulb_dump_path) and load_exist:
+        # print("found index\n")
         lb_idx = np.load(lb_dump_path)
         ulb_idx = np.load(ulb_dump_path)
+        np.savetxt('labeled_index.txt', lb_idx, fmt='%d')
+        print('LABELED_INDEX:', lb_idx, flush=True)
         return lb_idx, ulb_idx 
 
     
@@ -81,6 +104,10 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
         # balanced setting, lb_num_labels is total number of labels for labeled data
         assert lb_num_labels % num_classes == 0, "lb_num_labels must be dividable by num_classes in balanced setting"
         lb_samples_per_class = [int(lb_num_labels / num_classes)] * num_classes
+        
+        ### MODIFY THIS IT'S HARDCODED
+        # lb_samples_per_class = [lb_samples_per_class[0]] + [math.ceil((lb_num_labels // 2) / len(np.unique(cats)))] * len(np.unique(cats)) 
+        
     elif lb_imbalance_ratio == 0.0:
         # sample lb_num_labels samples, stratified by the targets
         lb_samples_per_class = make_stratified_data(lb_num_labels, num_classes, target)
@@ -115,8 +142,11 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
     #         lb_samples_per_class[0] += lb_samples_per_class[1] - len(idx1)
 
     for c in range(num_classes):
+        # print(f"Examples of class {c}\n")
+        # print(c, flush=True)
         idx = np.where(target == c)[0]
         np.random.shuffle(idx)
+        # print(len(idx), flush=True)
         lb_idx.extend(idx[:lb_samples_per_class[c]])
         if ulb_samples_per_class is None:
             ulb_idx.extend(idx[lb_samples_per_class[c]:])
@@ -125,7 +155,9 @@ def sample_labeled_unlabeled_data(args, data, target, num_classes,
     
     if isinstance(lb_idx, list):
         lb_idx = np.asarray(lb_idx)
-        print('LABELED_INDEX:', lb_idx)
+        # assert False
+        np.savetxt('labeled_index.txt', lb_idx, fmt='%d')
+        print('LABELED_INDEX:', lb_idx, flush=True)
     if isinstance(ulb_idx, list):
         ulb_idx = np.asarray(ulb_idx)
 
@@ -174,6 +206,14 @@ def get_collactor(args, net):
     elif net in ['longformer_base', 'longformer_base_multihead']:
         from semilearn.datasets.collactors import get_longformer_base_collactor
         collact_fn = get_longformer_base_collactor(args.max_length)
+    elif net in ['hate_bert']:
+        from semilearn.datasets.collactors import get_hate_bert_collactor
+        print("ABOUT TO GET HATE BERT\n", flush=True)
+        collact_fn = get_hate_bert_collactor(args.max_length)
+    elif net in ['deberta_v3_base', 'deberta_v3_base_multihead']:
+        from semilearn.datasets.collactors import get_deberta_collactor
+        print("ABOUT TO GET DEBERTA\n", flush=True)
+        collact_fn = get_deberta_collactor(args.max_length)
     else:
         collact_fn = None
     return collact_fn

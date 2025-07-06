@@ -6,7 +6,8 @@ from semilearn.core.algorithmbase import AlgorithmBase
 from semilearn.core.utils import ALGORITHMS
 from semilearn.algorithms.hooks import PseudoLabelingHook, FixedThresholdingHook
 from semilearn.algorithms.utils import SSL_Argument, str2bool
-
+import jsonlines
+import os
 
 @ALGORITHMS.register('fixmatch')
 class FixMatch(AlgorithmBase):
@@ -45,7 +46,13 @@ class FixMatch(AlgorithmBase):
         self.register_hook(FixedThresholdingHook(), "MaskingHook")
         super().set_hooks()
 
-    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s):
+    def _my_stats_log(self, d):
+        d['epoch'] = self.epoch
+        d['it'] = self.it
+        with jsonlines.open(os.path.join(self.args.save_dir, self.args.save_name, 'my_stats.jsonl'), mode='a') as writer:
+            writer.write(d)
+
+    def train_step(self, x_lb, y_lb, x_ulb_w, x_ulb_s, y_ulb):
         num_lb = y_lb.shape[0]
 
         # inference and calculate sup/unsup losses
@@ -83,12 +90,20 @@ class FixMatch(AlgorithmBase):
             # compute mask
             mask = self.call_hook("masking", "MaskingHook", logits_x_ulb=probs_x_ulb_w, softmax_x_ulb=False)
 
+
             # generate unlabeled targets using pseudo label hook
             pseudo_label = self.call_hook("gen_ulb_targets", "PseudoLabelingHook", 
                                           logits=probs_x_ulb_w,
                                           use_hard_label=self.use_hard_label,
                                           T=self.T,
                                           softmax=False)
+
+            if self.args.save_pseudolabels_stats:
+                my_stats_dict = {
+                    'mask_rate': (mask == 0).float().mean().item(),
+                    'impurity': (pseudo_label[mask != 0] == y_ulb[mask != 0]).float().mean().item(),
+                }
+                self._my_stats_log(my_stats_dict)
 
             unsup_loss = self.consistency_loss(logits_x_ulb_s,
                                                pseudo_label,
