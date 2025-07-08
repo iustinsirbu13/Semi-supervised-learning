@@ -1,16 +1,16 @@
-algorithm: supervised
+algorithm: fullysupervised
 save_dir: ./saved_models/usb_llm_safety
-save_name: supervised_wildguardmix_RH_2000_seed_1_neobert
+save_name: fullysupervised_wildguardmix_RH_2000_seed_2_neobert
 resume: True
-load_path: ./saved_models/usb_llm_safety/supervised_wildguardmix_RH_2000_seed_1_neobert/latest_model.pth
+load_path: ./saved_models/usb_llm_safety/fullysupervised_wildguardmix_RH_2000_seed_2_neobert/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: False
 epoch: 100
-num_train_iter: 50000
-num_warmup_iter: 500
-num_log_iter: 125
-num_eval_iter: 500
+num_train_iter: 850000
+num_warmup_iter: 8500
+num_log_iter: 2125
+num_eval_iter: 8500
 num_labels: 2000
 batch_size: 4
 eval_batch_size: 4
@@ -36,7 +36,7 @@ train_sampler: RandomSampler
 num_classes: 2
 num_workers: 4
 max_length: 1024
-seed: 1
+seed: 2
 world_size: 1
 rank: 0
 multiprocessing_distributed: False
@@ -46,3 +46,4 @@ gpu: 0
 include_lb_to_ulb: False
 text_weak_aug: orig
 text_strong_aug: translated
+early_stopping_iter: 12750

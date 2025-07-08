@@ -161,3 +161,8 @@ def get_deberta_collactor(max_length=512):
     tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-v3-base', truncation_side='left')
     collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
     return collact_fn
+
+def get_neobert_collactor(max_length=512):
+    tokenizer = AutoTokenizer.from_pretrained('chandar-lab/NeoBERT', truncation_side='left')
+    collact_fn = DataCollatorWithPadding(tokenizer, max_length=max_length)
+    return collact_fn

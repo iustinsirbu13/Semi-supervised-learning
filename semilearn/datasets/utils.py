@@ -214,6 +214,10 @@ def get_collactor(args, net):
         from semilearn.datasets.collactors import get_deberta_collactor
         print("ABOUT TO GET DEBERTA\n", flush=True)
         collact_fn = get_deberta_collactor(args.max_length)
+    elif net in ['NeoBERT']:
+        from semilearn.datasets.collactors import get_neobert_collactor
+        print("ABOUT TO GET NEOBERT\n", flush=True)
+        collact_fn = get_neobert_collactor(args.max_length)
     else:
         collact_fn = None
     return collact_fn

@@ -1,8 +1,8 @@
 algorithm: supervised
 save_dir: ./saved_models/usb_llm_safety
-save_name: supervised_wildguardmix_RH_200_translate_hate_seed_2_deberta
+save_name: supervised_wildguardmix_RH_200_seed_1_neobert
 resume: True
-load_path: ./saved_models/usb_llm_safety/supervised_wildguardmix_RH_200_translate_hate_seed_2_deberta/latest_model.pth
+load_path: ./saved_models/usb_llm_safety/supervised_wildguardmix_RH_200_seed_1_neobert/latest_model.pth
 overwrite: True
 use_tensorboard: True
 use_wandb: False
@@ -28,7 +28,7 @@ weight_decay: 0.0005
 layer_decay: 0.75
 amp: False
 clip: 0.0
-net: deberta_v3_base
+net: NeoBERT
 net_from_name: False
 data_dir: ./data
 dataset: wildguardmix_RH_translate_MarianMT
