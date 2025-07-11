@@ -87,6 +87,10 @@ class BasicDataset(Dataset):
                 d = {'idx':idx, 'text':sen[0], 'text_s':sen[indices[0]], 'text_s_':sen[indices[1]]}
                 d['ulb_label'] = -1 if target is None else target
                 return d
+            elif self.alg == 'sequencematch':
+                d = {'idx':idx, 'text':sen[0], 'text_s':sen[1], 'text_s_':sen[2]}
+                d['ulb_label'] = -1 if target is None else target
+                return d
             else:
                 d = {'idx':idx, 'text':sen[0], 'text_s':sen[self.random_choose_sen()]}
                 d['ulb_label'] = -1 if target is None else target
