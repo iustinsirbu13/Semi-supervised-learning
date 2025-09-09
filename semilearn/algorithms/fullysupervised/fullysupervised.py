@@ -63,6 +63,9 @@ class FullySupervised(AlgorithmBase):
 
             self.call_hook("after_train_epoch")
         self.call_hook("after_run")
+        
+        # print('AFTER RUN')
+        # self.predict_tmp('train_ulb')
 
 
 ALGORITHMS['supervised'] = FullySupervised

@@ -9,6 +9,8 @@ import random
 from semilearn.datasets.utils import split_ssl_data
 from .datasetbase import BasicDataset, LLMSafetyDataset
 
+import logging
+logger = logging.getLogger(__name__)
 
 def get_json_dset(args, alg='fixmatch', dataset='acmIb', num_labels=40, num_classes=20, data_dir='./data', index=None, include_lb_to_ulb=False, onehot=False):
         """
@@ -115,6 +117,19 @@ def get_json_dset_aug_list(args, alg='fixmatch', dataset='acmIb', num_labels=40,
                     ulb_sen_list.append((train_ulb_data[idx]['ori'],train_ulb_data[idx][text_weak_aug],train_ulb_data[idx][text_strong_aug]))
                     ulb_label_list.append(int(train_ulb_data[idx]['label']))
 
+            if num_labels > 0:
+                logger.info(f'Original num labeled examples: {len(lb_sen_list)}')
+                lb_sen_list, lb_label_list, _, _ = split_ssl_data(
+                    args, lb_sen_list, lb_label_list, num_classes, 
+                    lb_num_labels=num_labels,
+                    ulb_num_labels=args.ulb_num_labels,
+                    lb_imbalance_ratio=args.lb_imb_ratio,
+                    ulb_imbalance_ratio=args.ulb_imb_ratio,
+                    include_lb_to_ulb=include_lb_to_ulb
+                )
+                lb_label_list = lb_label_list.tolist()
+                logger.info(f'Sampled num labeled examples: {len(lb_sen_list)}')
+
             train_label_list = lb_label_list + ulb_label_list
             with open(os.path.join(json_dir,'dev.json'),'r') as json_data:
                 dev_data = json.load(json_data)
@@ -191,4 +206,5 @@ def get_json_dset_aug_list(args, alg='fixmatch', dataset='acmIb', num_labels=40,
             json.dump(out, w)
         lb_dset = LLMSafetyDataset(alg, lb_sen_list, lb_label_list, num_classes, False, onehot)
         ulb_dset = LLMSafetyDataset(alg, ulb_sen_list, ulb_label_list, num_classes, True, onehot)
+        logger.info(f'Dataset sizes: labeled - {len(lb_dset)}, unlabeled - {len(ulb_dset)}, dev - {len(dev_dset)}, test - {len(test_dset)}')
         return lb_dset, ulb_dset, dev_dset, test_dset

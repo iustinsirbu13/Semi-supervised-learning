@@ -11,6 +11,9 @@ from torch.utils.data import DataLoader
 from semilearn.datasets import get_collactor, name2sampler
 from semilearn.nets.utils import param_groups_layer_decay, param_groups_weight_decay
 
+import logging
+logger = logging.getLogger(__name__)
+
 def get_net_builder(net_name, from_name: bool):
     """
     built network according to network name
@@ -169,6 +172,7 @@ def get_data_loader(args,
         per_epoch_steps = num_iters // num_epochs
 
         num_samples = per_epoch_steps * batch_size * num_replicas
+        logger.info(f'Creating DataLoader with number of samples: {num_samples}')
 
         return DataLoader(dset, batch_size=batch_size, shuffle=False, num_workers=num_workers, collate_fn=collact_fn,
                           pin_memory=pin_memory, sampler=data_sampler(dset, num_replicas=num_replicas, rank=rank, num_samples=num_samples),
